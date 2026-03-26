@@ -47,108 +47,33 @@
 
 ---
 
-## 内核依赖
+## 编译
 
-本插件**不包含**代理内核，需自行安装以下任一内核：
-
-| 内核 | 安装路径 | 项目地址 |
-|------|----------|----------|
-| **mihomo**（原 Clash.Meta） | `/usr/bin/mihomo` | [MetaCubeX/mihomo](https://github.com/MetaCubeX/mihomo) |
-| **clash-meta** | `/usr/bin/clash-meta` | [MetaCubeX/mihomo](https://github.com/MetaCubeX/mihomo) |
-| **clash**（旧版） | `/etc/clash/clash` | [Dreamacro/clash](https://github.com/Dreamacro/clash)（已停更） |
-
----
-
-## OpenWrt 软件包依赖
-
-### 运行时必需
-
-| 包名 | 用途 |
-|------|------|
-| `luci` | LuCI Web 界面框架 |
-| `luci-base` | LuCI 基础库 |
-| `rpcd` | OpenWrt RPC 守护进程（23.05+ 必需） |
-| `rpcd-mod-file` | rpcd 文件读取模块（23.05+ 必需） |
-| `rpcd-mod-rpcsys` | rpcd 系统调用模块 |
-| `bash` | init.d 启动脚本所需 Shell |
-| `coreutils` | 基础命令工具集 |
-| `coreutils-nohup` | 后台运行支持 |
-| `coreutils-base64` | Base64 编解码 |
-| `curl` | 订阅下载 / GeoIP 更新 |
-| `wget` | 备用下载工具 |
-| `ca-certificates` | HTTPS 证书验证 |
-| `jsonfilter` | JSON 解析（UCI 配置处理） |
-
-### 透明代理（TProxy/Redir 模式）
-
-| 包名 | 用途 |
-|------|------|
-| `iptables` | IPv4 流量劫持规则 |
-| `iptables-mod-tproxy` | TProxy 透明代理模式支持 |
-| `ipset` | IP 集合管理（白名单 / 绕过规则） |
-| `kmod-tun` | TUN 虚拟网卡（TUN 模式必需） |
-| `ip-full` 或 `ip` | 路由策略配置 |
-
-### 可选增强
-
-| 包名 | 用途 |
-|------|------|
-| `libustream-openssl` 或 `libustream-mbedtls` | HTTPS 下载支持 |
-| `lsof` | 端口占用检测 |
-| `procps-ng-pgrep` | 进程状态检查（若系统无内置 `pgrep`） |
-
----
-
-## 安装方法
-
-### 方式一：opkg 直接安装
-
-```bash
-opkg update
-opkg install luci-app-clash
-```
-
-### 方式二：手动上传 ipk
-
-```bash
-# 将 ipk 上传到路由器后执行
-opkg install /tmp/luci-app-clash_*.ipk --force-depends
-```
-
-### 卸载
-
-```bash
-opkg remove luci-app-clash
-```
-
----
-
-## 从源码编译
-
-```bash
-# 1. 下载 OpenWrt SDK
-# 参考：https://openwrt.org/docs/guide-developer/toolchain/using_the_sdk
-
-# 2. 克隆本仓库到 package 目录
-git clone https://github.com/kenzok78/luci-app-clash.git package/luci-app-clash
-
-# 3. 更新 feeds
+```shell
+# 添加源
+echo "src-git clash https://github.com/kenzok78/luci-app-clash.git;test" >> feeds.conf.default
+# 更新并安装源
 ./scripts/feeds update -a
 ./scripts/feeds install -a
-
-# 4. 编译 i18n 语言文件
-pushd package/luci-app-clash/tools/po2lmo
-make && sudo make install
-popd
-po2lmo ./package/luci-app-clash/po/zh-cn/clash.po \
-       ./package/luci-app-clash/po/zh-cn/clash.zh-cn.lmo
-
-# 5. 选择包并编译
-make menuconfig   # 在 LuCI → Applications 中勾选 luci-app-clash
-make package/luci-app-clash/compile V=s
+# 编译
+make package/luci-app-clash/compile
 ```
 
----
+编译结果可以在 `bin/packages/your_architecture/base` 内找到。
+
+## 依赖
+
+- ca-bundle
+- curl
+- bash
+- coreutils-base64
+- ip-full
+- kmod-inet-diag
+- kmod-nft-socket
+- kmod-nft-tproxy
+- kmod-tun
+- iptables-mod-tproxy
+- ipset
 
 ## License
 
