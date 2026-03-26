@@ -168,7 +168,6 @@ define Package/$(PKG_NAME)/install
 	$(INSTALL_DATA) ./luasrc/model/cbi/clash/logs/*.lua $(1)/usr/lib/lua/luci/model/cbi/clash/logs
 	$(INSTALL_DATA) ./luasrc/model/cbi/clash/update/*.lua $(1)/usr/lib/lua/luci/model/cbi/clash/update
 	$(INSTALL_DATA) ./luasrc/view/clash/* $(1)/usr/lib/lua/luci/view/clash
-	$(INSTALL_DATA) ./po/zh-cn/clash.zh-cn.lmo $(1)/usr/lib/lua/luci/i18n
 
 	# luci 23.05+ JS 视图（htdocs）
 	$(INSTALL_DIR) $(1)/www/luci-static/resources/tools
@@ -185,4 +184,18 @@ define Package/$(PKG_NAME)/install
 	$(INSTALL_BIN)  ./root/usr/share/rpcd/ucode/luci.clash $(1)/usr/share/rpcd/ucode
 endef
 
+define Package/luci-i18n-clash-zh-cn
+	SECTION:=luci
+	CATEGORY:=LuCI
+	TITLE:=luci-app-clash - Simplified Chinese (zh-cn)
+	DEPENDS:=luci-app-clash
+	HIDDEN:=1
+endef
+
+define Package/luci-i18n-clash-zh-cn/install
+	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/i18n
+	$(INSTALL_DATA) ./po/zh-cn/clash.zh-cn.lmo $(1)/usr/lib/lua/luci/i18n
+endef
+
 $(eval $(call BuildPackage,$(PKG_NAME)))
+$(eval $(call BuildPackage,luci-i18n-clash-zh-cn))
