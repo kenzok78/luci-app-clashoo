@@ -2,49 +2,64 @@ env:
   SDK_VERSION: "24.10.4"
   PACKAGE: "luci-app-clash"
   FEEDNAME: "packages_ci"
-  SDK_DIR: /opt/sdk
+  SDK_DIR: /home/user/sdk
 
 build_task:
-  name: build / $TARGET
+  name: build / $ARCH
   only_if: $CIRRUS_BRANCH == "test" || $CIRRUS_TAG != ""
 
   matrix:
     - env:
-        TARGET: x86/64
+        ARCH: aarch64_cortex-a53
     - env:
-        TARGET: armvirt/64
+        ARCH: aarch64_cortex-a72
     - env:
-        TARGET: ath79/generic
+        ARCH: aarch64_generic
     - env:
-        TARGET: ramips/mt7621
+        ARCH: arm_cortex-a15_neon-vfpv4
     - env:
-        TARGET: rockchip/armv8
+        ARCH: arm_cortex-a5_vfpv4
     - env:
-        TARGET: mediatek/filogic
+        ARCH: arm_cortex-a7
+    - env:
+        ARCH: arm_cortex-a7_neon-vfpv4
+    - env:
+        ARCH: arm_cortex-a8_vfpv3
+    - env:
+        ARCH: arm_cortex-a9
+    - env:
+        ARCH: arm_cortex-a9_neon
+    - env:
+        ARCH: arm_cortex-a9_vfpv3-d16
+    - env:
+        ARCH: arm_fa526
+    - env:
+        ARCH: i386_pentium-mmx
+    - env:
+        ARCH: i386_pentium4
+    - env:
+        ARCH: mips64_octeonplus
+    - env:
+        ARCH: mips_24kc
+    - env:
+        ARCH: mips_4kec
+    - env:
+        ARCH: mips_mips32
+    - env:
+        ARCH: mipsel_24kc
+    - env:
+        ARCH: mipsel_24kc_24kf
+    - env:
+        ARCH: mipsel_74kc
+    - env:
+        ARCH: mipsel_mips32
+    - env:
+        ARCH: x86_64
 
   container:
-    image: ubuntu:22.04
+    image: ghcr.io/openwrt/sdk:${SDK_VERSION}-${ARCH}
     cpu: 2
     memory: 4G
-
-  install_script: |
-    apt-get update -qq
-    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-      build-essential clang flex bison g++ gawk gettext git \
-      libncurses-dev libssl-dev python3 rsync unzip \
-      zlib1g-dev file wget zstd xz-utils curl
-
-  download_sdk_script: |
-    SDK_BASE="https://downloads.openwrt.org/releases/${SDK_VERSION}/targets/${TARGET}/"
-    SDK_FILENAME=$(curl -sL "${SDK_BASE}" | grep -oE 'openwrt-sdk-[^"]+\.tar\.zst' | head -1)
-    if [ -z "${SDK_FILENAME}" ]; then
-      echo "ERROR: 无法找到 ${TARGET} 的 SDK，请检查 target 名称是否正确"
-      exit 1
-    fi
-    echo "==> 下载 ${SDK_BASE}${SDK_FILENAME}"
-    wget -q "${SDK_BASE}${SDK_FILENAME}" -O /tmp/sdk.tar.zst
-    mkdir -p "${SDK_DIR}"
-    tar -xf /tmp/sdk.tar.zst -C "${SDK_DIR}" --strip-components=1
 
   build_script: |
     set -e
