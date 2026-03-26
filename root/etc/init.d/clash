@@ -3,7 +3,14 @@
 START=99
 STOP=15
 
-CLASH="/etc/clash/clash"
+# 按优先级自动检测内核二进制：mihomo > clash-meta > 内置 clash
+_detect_core() {
+	for _bin in /usr/bin/mihomo /usr/bin/clash-meta /etc/clash/clashtun/clash /etc/clash/dtun/clash /etc/clash/clash; do
+		[ -x "$_bin" ] && echo "$_bin" && return
+	done
+	echo "/etc/clash/clash"
+}
+CLASH="$(_detect_core)"
 CLASHT="/etc/clash/clashtun/clash"
 CLASHD="/etc/clash/dtun/clash"
 CLASH_CONFIG="/etc/clash"

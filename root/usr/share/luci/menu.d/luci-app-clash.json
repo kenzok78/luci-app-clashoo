@@ -1,0 +1,28 @@
+{
+    "admin/services/clash": {
+        "title": "Clash",
+        "action": {
+            "type": "firstchild"
+        },
+        "depends": {
+            "acl": [ "luci-app-clash" ],
+            "uci": { "clash": true }
+        }
+    },
+    "admin/services/clash/app": {
+        "title": "Overview",
+        "order": 10,
+        "action": {
+            "type": "view",
+            "path": "clash/app"
+        }
+    },
+    "admin/services/clash/log": {
+        "title": "Log",
+        "order": 20,
+        "action": {
+            "type": "view",
+            "path": "clash/log"
+        }
+    }
+}

@@ -11,43 +11,43 @@ function index()
 		return
 	end
 
-	local page = entry({"admin", "services", "clash"},alias("admin", "services", "clash", "overview"), _("Clash"), 1)
-	page.dependent = true
-	page.acl_depends = {"luci-app-clash"}
-	
-	entry({"admin", "services", "clash", "overview"},cbi("clash/overview"),_("Overview"), 10).leaf = true
-	entry({"admin", "services", "clash", "client"},cbi("clash/client/client"),_("Client"), 20).leaf = true
+	-- luci 23.05+ 通过 menu.d JSON 注册菜单，此处只保留 API 路由
+	local has_menu_d = nixio.fs.access("/usr/share/luci/menu.d/luci-app-clash.json")
+	if not has_menu_d then
+		local page = entry({"admin", "services", "clash"},alias("admin", "services", "clash", "overview"), _("Clash"), 1)
+		page.dependent = true
+		page.acl_depends = {"luci-app-clash"}
 
-	entry({"admin", "services", "clash", "config"}, firstchild(),_("Config"), 25)
-	entry({"admin", "services", "clash", "config", "import"},cbi("clash/config/import"),_("Import Config"), 25).leaf = true
-	entry({"admin", "services", "clash", "config", "config"},cbi("clash/config/config"),_("Select Config"), 30).leaf = true
-	
-	entry({"admin", "services", "clash", "config", "create"},cbi("clash/config/create"),_("Create Config"), 35).leaf = true
-	entry({"admin", "services", "clash", "proxyprovider"},cbi("clash/config/proxy_provider"), nil).leaf = true
-	entry({"admin", "services", "clash", "servers"},cbi("clash/config/servers-config"), nil).leaf = true
-    entry({"admin", "services", "clash", "ruleprovider"},cbi("clash/config/rule_provider"), nil).leaf = true	
-	entry({"admin", "services", "clash", "rules"},cbi("clash/config/rules"), nil).leaf = true
-	entry({"admin", "services", "clash", "pgroups"},cbi("clash/config/groups"), nil).leaf = true
-	entry({"admin", "services", "clash", "rulemanager"},cbi("clash/config/ruleprovider_manager"), nil).leaf = true
-	
-	
-	entry({"admin", "services", "clash", "settings"}, firstchild(),_("Settings"), 40)
-	entry({"admin", "services", "clash", "settings", "port"},cbi("clash/dns/port"),_("Proxy Ports"), 60).leaf = true
-	entry({"admin", "services", "clash", "settings", "geoip"},cbi("clash/geoip/geoip"),_("Update GeoIP"), 80).leaf = true
-	entry({"admin", "services", "clash", "settings", "grules"},cbi("clash/game/game-settings"),_("Game Rules"), 91).dependent = false
-    entry({"admin", "services", "clash", "g-rules"},cbi("clash/game/game-rule"), nil).leaf = true
-	entry({"admin", "services", "clash", "settings", "other"},cbi("clash/other"),_("Other Settings"), 92).leaf = true
-    entry({"admin", "services", "clash", "ip-rules"},cbi("clash/config/ip-rules"), nil).leaf = true	
-	entry({"admin", "services", "clash", "settings", "dns"},firstchild(),_("DNS Settings"), 65)
-	entry({"admin", "services", "clash", "settings", "dns", "dns"},cbi("clash/dns/dns"),_("Clash DNS"), 70).leaf = true
-	entry({"admin", "services", "clash", "settings", "dns", "advance"},cbi("clash/dns/advance"),_("Advance DNS"), 75).leaf = true
-	
+		entry({"admin", "services", "clash", "overview"},cbi("clash/overview"),_("Overview"), 10).leaf = true
+		entry({"admin", "services", "clash", "client"},cbi("clash/client/client"),_("Client"), 20).leaf = true
 
-	
-	entry({"admin", "services", "clash", "update"},cbi("clash/update/update"),_("Update"), 45).leaf = true
-	entry({"admin", "services", "clash", "log"},cbi("clash/logs/log"),_("Log"), 50).leaf = true
-	
+		entry({"admin", "services", "clash", "config"}, firstchild(),_("Config"), 25)
+		entry({"admin", "services", "clash", "config", "import"},cbi("clash/config/import"),_("Import Config"), 25).leaf = true
+		entry({"admin", "services", "clash", "config", "config"},cbi("clash/config/config"),_("Select Config"), 30).leaf = true
+		entry({"admin", "services", "clash", "config", "create"},cbi("clash/config/create"),_("Create Config"), 35).leaf = true
+		entry({"admin", "services", "clash", "proxyprovider"},cbi("clash/config/proxy_provider"), nil).leaf = true
+		entry({"admin", "services", "clash", "servers"},cbi("clash/config/servers-config"), nil).leaf = true
+		entry({"admin", "services", "clash", "ruleprovider"},cbi("clash/config/rule_provider"), nil).leaf = true
+		entry({"admin", "services", "clash", "rules"},cbi("clash/config/rules"), nil).leaf = true
+		entry({"admin", "services", "clash", "pgroups"},cbi("clash/config/groups"), nil).leaf = true
+		entry({"admin", "services", "clash", "rulemanager"},cbi("clash/config/ruleprovider_manager"), nil).leaf = true
 
+		entry({"admin", "services", "clash", "settings"}, firstchild(),_("Settings"), 40)
+		entry({"admin", "services", "clash", "settings", "port"},cbi("clash/dns/port"),_("Proxy Ports"), 60).leaf = true
+		entry({"admin", "services", "clash", "settings", "geoip"},cbi("clash/geoip/geoip"),_("Update GeoIP"), 80).leaf = true
+		entry({"admin", "services", "clash", "settings", "grules"},cbi("clash/game/game-settings"),_("Game Rules"), 91).dependent = false
+		entry({"admin", "services", "clash", "g-rules"},cbi("clash/game/game-rule"), nil).leaf = true
+		entry({"admin", "services", "clash", "settings", "other"},cbi("clash/other"),_("Other Settings"), 92).leaf = true
+		entry({"admin", "services", "clash", "ip-rules"},cbi("clash/config/ip-rules"), nil).leaf = true
+		entry({"admin", "services", "clash", "settings", "dns"},firstchild(),_("DNS Settings"), 65)
+		entry({"admin", "services", "clash", "settings", "dns", "dns"},cbi("clash/dns/dns"),_("Clash DNS"), 70).leaf = true
+		entry({"admin", "services", "clash", "settings", "dns", "advance"},cbi("clash/dns/advance"),_("Advance DNS"), 75).leaf = true
+
+		entry({"admin", "services", "clash", "update"},cbi("clash/update/update"),_("Update"), 45).leaf = true
+		entry({"admin", "services", "clash", "log"},cbi("clash/logs/log"),_("Log"), 50).leaf = true
+	end
+
+	-- API 路由（两版本都需要）
 	entry({"admin","services","clash","check_status"},call("check_status")).leaf=true
 	entry({"admin", "services", "clash", "ping"}, call("act_ping")).leaf=true
 	entry({"admin", "services", "clash", "readlog"},call("action_read")).leaf=true

@@ -1,19 +1,12 @@
+/* index.js – luci 23.05+ 路由兼容：将 /app 路径做 alias，此文件保留给
+   旧 menu.d 路径引用或本地开发使用。
+   功能内容已移至 view/clash/app.js，menu.d 中 path 指向 "clash/app"。 */
 'use strict';
 'require view';
-'require rpc';
-'require form';
-'require uci';
+'require tools.clash as clash';
 
-return view.extend({
-	load: function() {
-		return uci.load('clash');
-	},
-
-	render: function() {
-		var m = new form.Map('clash', _('Clash'), _('LuCI interface for Clash'));
-		var s = m.section(form.NamedSection, 'config', 'config', _('Configuration'));
-		s.anonymous = true;
-		
-		return m.render();
-	}
-});
+/* 直接 re-export app view */
+return (function () {
+    'require view';
+    return L.require('view.clash.app');
+})();

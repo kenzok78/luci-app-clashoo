@@ -169,6 +169,20 @@ define Package/$(PKG_NAME)/install
 	$(INSTALL_DATA) ./luasrc/model/cbi/clash/update/*.lua $(1)/usr/lib/lua/luci/model/cbi/clash/update
 	$(INSTALL_DATA) ./luasrc/view/clash/* $(1)/usr/lib/lua/luci/view/clash
 	$(INSTALL_DATA) ./po/zh-cn/clash.zh-cn.lmo $(1)/usr/lib/lua/luci/i18n
+
+	# luci 23.05+ JS 视图（htdocs）
+	$(INSTALL_DIR) $(1)/www/luci-static/resources/tools
+	$(INSTALL_DIR) $(1)/www/luci-static/resources/view/clash
+	$(INSTALL_DATA) ./htdocs/luci-static/resources/tools/clash.js $(1)/www/luci-static/resources/tools
+	$(INSTALL_DATA) ./htdocs/luci-static/resources/view/clash/app.js $(1)/www/luci-static/resources/view/clash
+	$(INSTALL_DATA) ./htdocs/luci-static/resources/view/clash/log.js $(1)/www/luci-static/resources/view/clash
+	$(INSTALL_DATA) ./htdocs/luci-static/resources/view/clash/index.js $(1)/www/luci-static/resources/view/clash
+
+	# luci 23.05+ menu.d & rpcd ucode
+	$(INSTALL_DIR) $(1)/usr/share/luci/menu.d
+	$(INSTALL_DIR) $(1)/usr/share/rpcd/ucode
+	$(INSTALL_DATA) ./root/usr/share/luci/menu.d/luci-app-clash.json $(1)/usr/share/luci/menu.d
+	$(INSTALL_BIN)  ./root/usr/share/rpcd/ucode/luci.clash $(1)/usr/share/rpcd/ucode
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))
