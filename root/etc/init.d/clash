@@ -39,6 +39,29 @@ _core_candidates() {
 	echo "/usr/bin/mihomo /usr/bin/clash-meta /etc/clash/clashtun/clash /etc/clash/dtun/clash /etc/clash/clash"
 }
 
+_detect_selected_core() {
+	local selected
+	selected=$(uci get clash.config.core 2>/dev/null)
+	case "$selected" in
+		1)
+			for _bin in /etc/clash/clash /usr/bin/clash; do
+				[ -x "$_bin" ] && echo "$_bin" && return
+			done
+			;;
+		2)
+			for _bin in /usr/bin/clash-meta /etc/clash/clash-meta /usr/bin/mihomo; do
+				[ -x "$_bin" ] && echo "$_bin" && return
+			done
+			;;
+		3)
+			for _bin in /usr/bin/mihomo /etc/clash/clash; do
+				[ -x "$_bin" ] && echo "$_bin" && return
+			done
+			;;
+	esac
+	_detect_core
+}
+
 core_supports_advanced_features() {
 	case "$CLASH" in
 		*/mihomo|*/clash-meta)
@@ -104,7 +127,7 @@ _detect_core() {
 	done
 	echo "/etc/clash/clash"
 }
-CLASH="$(_detect_core)"
+CLASH="$(_detect_selected_core)"
 CLASHT="/etc/clash/clashtun/clash"
 CLASHD="/etc/clash/dtun/clash"
 CLASH_CONFIG="/etc/clash"
@@ -646,7 +669,7 @@ if  [  -f $CONFIG_YAML ] && [ "$(ls -l $CONFIG_YAML|awk '{print int($5)}')" -ne 
 
 	fi
 
-	if [ ! -z "$(egrep '^ {0,}rule-providers:' "/etc/clash/config.yaml")" ] && [ "$(uci get clash.config.core)" -ne 4 ] && ! core_supports_advanced_features; then
+	if [ ! -z "$(egrep '^ {0,}rule-providers:' "/etc/clash/config.yaml")" ] && ! core_supports_advanced_features; then
 		
 		if [ -f /etc/clash/dtun/clash ];then
 		uci set clash.config.core="4" && uci commit clash
@@ -664,7 +687,7 @@ if  [  -f $CONFIG_YAML ] && [ "$(ls -l $CONFIG_YAML|awk '{print int($5)}')" -ne 
 		fi
 	fi
 	
-	if [ ! -z "$(egrep '^ {0,}script:' "/etc/clash/config.yaml")" ] && [ "$(uci get clash.config.core)" -ne 4 ] && ! core_supports_advanced_features; then
+	if [ ! -z "$(egrep '^ {0,}script:' "/etc/clash/config.yaml")" ] && ! core_supports_advanced_features; then
 		if [ -f /etc/clash/dtun/clash ];then
 		uci set clash.config.core="4" && uci commit clash
 		sleep 1
@@ -721,31 +744,11 @@ if  [  -f $CONFIG_YAML ] && [ "$(ls -l $CONFIG_YAML|awk '{print int($5)}')" -ne 
     ip_rules >/dev/null 2>&1
 	
         
-    if [ "$(uci get clash.config.core)" -eq 1 ];then
-        	nohup $CLASH -d "$CLASH_CONFIG" > /usr/share/clash/clash.txt 2>&1 &	
-		
-		if [ "${lang}" == "en" ] || [ $lang == "auto" ];then
-			echo "Clash Core Started Successfully " >$REAL_LOG 
-		elif [ "${lang}" == "zh_cn" ];then
-			echo "Clash 计划任务,启动进程守护程序..." >$REAL_LOG
-		fi
-		
-	elif [ "$(uci get clash.config.core)" -eq 3 ];then
-       	 	nohup $CLASHT -d "$CLASH_CONFIG" > /usr/share/clash/clash.txt 2>&1 &	
-		
-		if [ "${lang}" == "en" ] || [ $lang == "auto" ];then
-			echo "Clash Core Started Successfully " >$REAL_LOG 
-		elif [ "${lang}" == "zh_cn" ];then
-			echo "Clash 计划任务,启动进程守护程序..." >$REAL_LOG
-		fi	
-	elif [ "$(uci get clash.config.core)" -eq 4 ];then
-       	 	nohup $CLASHD -d "$CLASH_CONFIG" > /usr/share/clash/clash.txt 2>&1 &	
-		
-		if [ "${lang}" == "en" ] || [ $lang == "auto" ];then
-			echo "Clash Core Started Successfully " >$REAL_LOG 
-		elif [ "${lang}" == "zh_cn" ];then
-			echo "Clash 计划任务,启动进程守护程序..." >$REAL_LOG
-		fi	
+	nohup "$CLASH" -d "$CLASH_CONFIG" > /usr/share/clash/clash.txt 2>&1 &
+	if [ "${lang}" == "en" ] || [ $lang == "auto" ];then
+		echo "Clash Core Started Successfully " >$REAL_LOG 
+	elif [ "${lang}" == "zh_cn" ];then
+		echo "Clash 计划任务,启动进程守护程序..." >$REAL_LOG
 	fi
 	ln -s /usr/share/clash/yacd /www/luci-static/yacd 2>/dev/null		
 

@@ -9,28 +9,49 @@ local clash = "clash"
 
 
 m = Map("clash")
+m.description = [[
+<style>
+#cbi-clash-config-Apply .cbi-value-field,
+#cbi-clash-config-action .cbi-value-field {
+	width: 100%;
+}
+
+#cbi-clash-config-Apply .cbi-value-field .cbi-button {
+	min-width: 180px;
+}
+
+@media only screen and (max-width: 900px) {
+	#cbi-clash-config-Apply .cbi-value-title,
+	#cbi-clash-config-Apply .cbi-value-field,
+	#cbi-clash-config-action .cbi-value-title,
+	#cbi-clash-config-action .cbi-value-field {
+		display: block;
+		width: 100% !important;
+	}
+
+	#cbi-clash-config-Apply .cbi-value-field .cbi-button {
+		width: 100%;
+		height: 42px;
+		margin: 0;
+	}
+
+	#cbi-clash-config-action .cbi-value-field {
+		width: 100% !important;
+	}
+}
+</style>
+]]
 s = m:section(TypedSection, "clash")
 s.anonymous = true
 m.pageaction = false
 
 o = s:option(ListValue, "core", translate("Core"))
-o.default = "clashcore"
-if nixio.fs.access("/etc/clash/clash") then
-o:value("1", translate("Clash"))
-end
-if nixio.fs.access("/etc/clash/clashtun/clash") then
-o:value("3", translate("Clash(cTun)"))
-end
-if nixio.fs.access("/etc/clash/dtun/clash") then
-o:value("4", translate("Clash(premium)"))
-end
+o.default = "3"
+o:value("1", translate("clash"))
+o:value("2", translate("clash meta"))
+o:value("3", translate("mihomo"))
 
 
-o = s:option(ListValue, "g_rules", translate("Game Rules"))
-o.default = "0"
-o:value("0", translate("Disable"))
-o:value("1", translate("Enable"))
-o.description = translate("Set rules under Setting=>Game Rules, will take effect when client start")
 
 
 o = s:option(ListValue, "append_rules", translate("Append Customs Rules"))
@@ -53,4 +74,3 @@ o.template = "clash/start_stop"
 
 
 return m
-

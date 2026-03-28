@@ -15,6 +15,105 @@ bold_on  = [[<strong>]]
 bold_off = [[</strong>]]
 
 krk = Map(clash)
+krk.description = [[
+<style>
+#cbi-clash-config-Manager .cbi-button {
+	background: #0891b2 !important;
+	border-color: #0891b2 !important;
+	color: #fff !important;
+}
+
+#cbi-table-1-Creat_Config .cbi-button {
+	background: #16a34a !important;
+	border-color: #16a34a !important;
+	color: #fff !important;
+}
+
+#cbi-table-table .cbi-button-reset {
+	background: #71717a !important;
+	border-color: #71717a !important;
+	color: #fff !important;
+}
+
+#cbi-table-1-Delete_Groups .cbi-button-reset,
+#cbid\.table\.1\.Delete_Groups {
+	background: #d97706 !important;
+	border-color: #d97706 !important;
+	color: #fff !important;
+}
+
+#cbi-table-table .cbi-button,
+#cbi-clash-config-Manager .cbi-button {
+	border-radius: 9px;
+	font-weight: 600;
+}
+
+@media only screen and (max-width: 900px) {
+	#cbi-clash-config-Manager .cbi-value-title,
+	#cbi-clash-config-Manager .cbi-value-field {
+		display: block;
+		width: 100% !important;
+	}
+
+	#cbi-clash-config-Manager .cbi-button {
+		width: 100%;
+		height: 42px;
+		margin: 0;
+	}
+
+	#cbi-table-table .cbi-section-table {
+		display: block !important;
+		width: 100% !important;
+	}
+
+	#cbi-table-table .cbi-section-table-row {
+		display: grid !important;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 12px;
+	}
+
+	#cbi-table-table .cbi-section-table-row > .cbi-value-field {
+		display: block !important;
+		width: auto !important;
+		min-width: 0;
+		padding: 0 !important;
+		border: 0 !important;
+		margin: 0 !important;
+		background: transparent !important;
+	}
+
+	#cbi-table-table .cbi-section-table-row > .cbi-value-field > div {
+		width: 100%;
+	}
+
+	#cbi-table-table .cbi-button {
+		display: block;
+		width: 100% !important;
+		min-width: 0 !important;
+		height: 44px;
+		margin: 0;
+		padding: 0 12px;
+		font-size: 14px;
+		text-align: center;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	#cbi-clash-servers .cbi-section-create .cbi-button-add,
+	#cbi-clash-pgroups .cbi-section-create .cbi-button-add,
+	#cbi-clash-proxyprovider .cbi-section-create .cbi-button-add,
+	#cbi-clash-ruleprovider .cbi-section-create .cbi-button-add,
+	#cbi-clash-rules .cbi-section-create .cbi-button-add {
+		min-width: 120px;
+		height: 42px;
+		padding: 0 16px;
+		border-radius: 9px;
+		font-size: 16px;
+	}
+}
+</style>
+]]
 s = krk:section(TypedSection, "clash", translate("Create Config"))
 s.anonymous = true
 --krk.pageaction = false
@@ -383,4 +482,3 @@ end
 krk:append(Template("clash/list"))
 
 return krk,m,l
-

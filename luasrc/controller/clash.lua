@@ -11,7 +11,7 @@ function index()
 		return
 	end
 
-	-- luci 23.05+ 通过 menu.d JSON 注册菜单，此处只保留 API 路由
+	-- luci 24.10+ 通过 menu.d JSON 注册菜单，此处只保留 API 路由
 	local has_menu_d = nixio.fs.access("/usr/share/luci/menu.d/luci-app-clash.json")
 	if not has_menu_d then
 		local page = entry({"admin", "services", "clash"},alias("admin", "services", "clash", "overview"), _("Clash"), 1)
@@ -35,8 +35,6 @@ function index()
 		entry({"admin", "services", "clash", "settings"}, firstchild(),_("Settings"), 40)
 		entry({"admin", "services", "clash", "settings", "port"},cbi("clash/dns/port"),_("Proxy Ports"), 60).leaf = true
 		entry({"admin", "services", "clash", "settings", "geoip"},cbi("clash/geoip/geoip"),_("Update GeoIP"), 80).leaf = true
-		entry({"admin", "services", "clash", "settings", "grules"},cbi("clash/game/game-settings"),_("Game Rules"), 91).dependent = false
-		entry({"admin", "services", "clash", "g-rules"},cbi("clash/game/game-rule"), nil).leaf = true
 		entry({"admin", "services", "clash", "settings", "other"},cbi("clash/other"),_("Other Settings"), 92).leaf = true
 		entry({"admin", "services", "clash", "ip-rules"},cbi("clash/config/ip-rules"), nil).leaf = true
 		entry({"admin", "services", "clash", "settings", "dns"},firstchild(),_("DNS Settings"), 65)
@@ -57,6 +55,10 @@ function index()
 	entry({"admin", "services", "clash", "start"}, call("do_start")).leaf=true
 	entry({"admin", "services", "clash", "stop"}, call("do_stop")).leaf=true
 	entry({"admin", "services", "clash", "reload"}, call("do_reload")).leaf=true
+	entry({"admin", "services", "clash", "set_mode"}, call("do_set_mode")).leaf=true
+	entry({"admin", "services", "clash", "list_configs"}, call("action_list_configs")).leaf=true
+	entry({"admin", "services", "clash", "set_config"}, call("do_set_config")).leaf=true
+	entry({"admin", "services", "clash", "set_panel"}, call("do_set_panel")).leaf=true
 	entry({"admin", "services", "clash", "geo"}, call("geoip_check")).leaf=true
 	entry({"admin", "services", "clash", "geoipupdate"}, call("geoip_update")).leaf=true
 	entry({"admin", "services", "clash", "check_geoip"}, call("check_geoip_log")).leaf=true	
@@ -136,14 +138,32 @@ local function typeconf()
 	return luci.sys.exec("uci get clash.config.config_type")
 end
 
+local function list_configs()
+	local configs = {}
+	for path in nixio.fs.glob('/usr/share/clash/config/sub/*.yaml') do
+		configs[#configs + 1] = fss.basename(path)
+	end
+	for path in nixio.fs.glob('/usr/share/clash/config/upload/*.yaml') do
+		configs[#configs + 1] = fss.basename(path)
+	end
+	table.sort(configs)
+	return configs
+end
+
 
 function action_conf()
 	luci.http.prepare_content("application/json")
 	luci.http.write_json({
 	conf_path = conf_path(),
-	typeconf = typeconf()
+	typeconf = typeconf(),
+	configs = list_configs()
 
 	})
+end
+
+function action_list_configs()
+	luci.http.prepare_content("application/json")
+	luci.http.write_json({ configs = list_configs(), current = conf_path() })
 end
 
 
@@ -152,6 +172,57 @@ local function dash_port()
 end
 local function dash_pass()
 	return luci.sys.exec("uci get clash.config.dash_pass 2>/dev/null")
+end
+
+local function selected_core_bin()
+	local core = luci.sys.exec("uci get clash.config.core 2>/dev/null")
+	core = core and core:gsub("\n", "") or ""
+	if core == "1" then
+		if nixio.fs.access("/etc/clash/clash") then return "/etc/clash/clash" end
+		if nixio.fs.access("/usr/bin/clash") then return "/usr/bin/clash" end
+	elseif core == "2" then
+		if nixio.fs.access("/usr/bin/clash-meta") then return "/usr/bin/clash-meta" end
+		if nixio.fs.access("/etc/clash/clash-meta") then return "/etc/clash/clash-meta" end
+		if nixio.fs.access("/usr/bin/mihomo") then return "/usr/bin/mihomo" end
+	else
+		if nixio.fs.access("/usr/bin/mihomo") then return "/usr/bin/mihomo" end
+		if nixio.fs.access("/etc/clash/clash") then return "/etc/clash/clash" end
+	end
+	return ""
+end
+
+local function dashboard_panel()
+	return luci.sys.exec("uci get clash.config.dashboard_panel 2>/dev/null")
+end
+
+local function binary_version(path)
+	if nixio.fs.access(path) then
+		return luci.sys.exec(path .. " -v 2>/dev/null | awk 'NR==1 { if ($1 == \"Mihomo\") print $3; else print $2 }'")
+	end
+	return "0"
+end
+
+local function clash_binary_core()
+	return binary_version("/etc/clash/clash")
+end
+
+local function clash_meta_core()
+	if nixio.fs.access("/usr/bin/clash-meta") then
+		return binary_version("/usr/bin/clash-meta")
+	end
+	return binary_version("/etc/clash/clash-meta")
+end
+
+local function mihomo_core()
+	return binary_version("/usr/bin/mihomo")
+end
+
+local function new_mihomo_version()
+	return luci.sys.exec("sed -n 1p /usr/share/clash/new_mihomo_core_version 2>/dev/null")
+end
+
+local function new_clash_meta_version()
+	return luci.sys.exec("sed -n 1p /usr/share/clash/new_clash_meta_core_version 2>/dev/null")
 end
 
 local function is_running()
@@ -163,7 +234,13 @@ local function is_web()
 end
 
 local function localip()
-	return luci.sys.exec("uci get network.lan.ipaddr")
+	local ip = luci.sys.exec("uci -q get network.lan.ipaddr 2>/dev/null") or ""
+	ip = ip:gsub("%s+", ""):gsub("/%d+$", "")
+	if ip == "" then
+		ip = luci.sys.exec("ip -4 -o addr show dev br-lan 2>/dev/null | awk '{print $4}' | sed -n '1p'") or ""
+		ip = ip:gsub("%s+", ""):gsub("/%d+$", "")
+	end
+	return ip
 end
 
 local function check_version()
@@ -206,6 +283,24 @@ end
 
 local function e_mode()
 	return luci.sys.exec("egrep '^ {0,}enhanced-mode' /etc/clash/config.yaml |grep enhanced-mode: |awk -F ': ' '{print $2}'")
+end
+
+local function mode_value()
+	local tun = luci.sys.exec("uci get clash.config.tun_mode 2>/dev/null")
+	tun = tun and tun:gsub("\n", "") or "0"
+	if tun == "1" then
+		return "tun"
+	end
+	return "fake-ip"
+end
+
+local function ping_enable()
+	local v = luci.sys.exec("uci -q get clash.config.ping_enable 2>/dev/null") or ""
+	v = v:gsub("%s+", "")
+	if v == "" then
+		return "0"
+	end
+	return v
 end
 
 
@@ -314,6 +409,8 @@ function check_status()
 	luci.http.write_json({
 		check_version = check_version(),
 		check_core = check_core(),
+		check_mihomo = luci.sys.exec("sh /usr/share/clash/check_mihomo_core_version.sh"),
+		check_clash_meta = luci.sys.exec("sh /usr/share/clash/check_clash_meta_version.sh"),
 		current_version = current_version(),
 		new_version = new_version(),
 		clash_core = clash_core(),
@@ -322,6 +419,8 @@ function check_status()
 		clashtun_core = clashtun_core(),
 		dtun_core = dtun_core(),
 		new_core_version = new_core_version(),
+		new_mihomo_version = new_mihomo_version(),
+		new_clash_meta_version = new_clash_meta_version(),
 		new_clashtun_core_version =new_clashtun_core_version(),
 		check_clashtun_core = check_clashtun_core(),
 		conf_path = conf_path(),
@@ -335,16 +434,22 @@ function action_status()
 		clash = is_running(),
 		localip = localip(),
 		dash_port = dash_port(),
+		dashboard_panel = dashboard_panel(),
 		current_version = current_version(),
 		new_dtun_core = new_dtun_core(),
 		new_core_version = new_core_version(),
 		new_clashtun_core_version =new_clashtun_core_version(),
 		new_version = new_version(),
-		clash_core = clash_core(),
+		clash_core = clash_binary_core(),
+		clash_meta_core = clash_meta_core(),
+		mihomo_core = mihomo_core(),
 		dtun_core = dtun_core(),
 		dash_pass = dash_pass(),
 		clashtun_core = clashtun_core(),
+		new_clash_meta_version = new_clash_meta_version(),
+		new_mihomo_version = new_mihomo_version(),
 		e_mode = e_mode(),
+		mode_value = mode_value(),
 		in_use = in_use(),
 		conf_path = conf_path(),
 		uhttp_port = uhttp_port(),
@@ -380,25 +485,101 @@ function do_update()
 end
 
 function do_start()
-	luci.sys.exec('uci set clash.config.enable="1" && uci commit clash')
-	luci.sys.exec("/etc/init.d/clash restart 2>&1 &")
+	local bin = selected_core_bin()
+	if bin == "" then
+		return
+	end
+	luci.sys.exec(string.format([[
+		uci set clash.config.enable="1" && uci commit clash;
+		CONFIG_PATH=$(uci -q get clash.config.use_config);
+		[ -f "$CONFIG_PATH" ] || exit 1;
+		cp "$CONFIG_PATH" /etc/clash/config.yaml;
+		if grep -q '^dns:' /etc/clash/config.yaml && ! grep -Eq '^ +listen:' /etc/clash/config.yaml; then sed -i '/^dns:/a\    listen: 0.0.0.0:5300' /etc/clash/config.yaml; fi;
+		pkill -9 -x mihomo >/dev/null 2>&1 || true;
+		pkill -9 -x clash-meta >/dev/null 2>&1 || true;
+		pkill -9 -x clash >/dev/null 2>&1 || true;
+		nohup %q -d /etc/clash >/usr/share/clash/clash.txt 2>&1 &
+		sleep 3;
+		uci delete dhcp.@dnsmasq[0].server >/dev/null 2>&1 || true;
+		uci add_list dhcp.@dnsmasq[0].server='127.0.0.1#5300';
+		uci set dhcp.@dnsmasq[0].noresolv='1';
+		uci set dhcp.@dnsmasq[0].cachesize='0';
+		uci commit dhcp;
+		/etc/init.d/dnsmasq restart >/dev/null 2>&1;
+		/usr/share/clash/fw4.sh remove >/dev/null 2>&1 || true;
+		/usr/share/clash/fw4.sh apply >/dev/null 2>&1 || true
+	]], bin))
 end
 
 function do_stop()
-	luci.sys.exec('uci set clash.config.enable="0" && uci commit clash')
-	luci.sys.exec("/etc/init.d/clash stop 2>&1 &")
+	luci.sys.exec([[
+		uci set clash.config.enable="0" && uci commit clash;
+		pkill -9 -x mihomo >/dev/null 2>&1 || true;
+		pkill -9 -x clash-meta >/dev/null 2>&1 || true;
+		pkill -9 -x clash >/dev/null 2>&1 || true;
+		/usr/share/clash/fw4.sh remove >/dev/null 2>&1 || true;
+		uci delete dhcp.@dnsmasq[0].server >/dev/null 2>&1 || true;
+		uci set dhcp.@dnsmasq[0].noresolv='0';
+		uci add_list dhcp.@dnsmasq[0].server='119.29.29.29';
+		uci add_list dhcp.@dnsmasq[0].server='223.5.5.5';
+		uci commit dhcp;
+		/etc/init.d/dnsmasq restart >/dev/null 2>&1
+	]])
 end
 
 function do_reload()
-	if luci.sys.call("pidof clash >/dev/null") == 0 then
-		luci.sys.exec("/etc/init.d/clash reload 2>&1 &")
-	end	
+	do_start()
+end
+
+function do_set_mode()
+	local mode = luci.http.formvalue("mode") or "fake-ip"
+	if mode == "tun" then
+		luci.sys.exec([[uci set clash.config.tun_mode='1'; uci set clash.config.stack='system'; uci set clash.config.enable_udp='1'; uci commit clash]])
+	else
+		luci.sys.exec([[uci set clash.config.tun_mode='0'; uci set clash.config.enhanced_mode='fake-ip'; uci commit clash]])
+	end
+	luci.http.status(200, "OK")
+end
+
+function do_set_config()
+	local name = luci.http.formvalue("name") or ""
+	if name == "" then
+		luci.http.status(400, "Bad Request")
+		return
+	end
+	local candidate = "/usr/share/clash/config/sub/" .. name
+	if not nixio.fs.access(candidate) then
+		candidate = "/usr/share/clash/config/upload/" .. name
+	end
+	if nixio.fs.access(candidate) then
+		luci.sys.exec(string.format([[uci set clash.config.use_config=%q; uci set clash.config.config_type='1'; uci commit clash]], candidate))
+		if is_running() then
+			do_start()
+		end
+		luci.http.status(200, "OK")
+	else
+		luci.http.status(404, "Not Found")
+	end
+end
+
+function do_set_panel()
+	local name = luci.http.formvalue("name") or "metacubexd"
+	if name ~= "metacubexd" and name ~= "yacd" and name ~= "zashboard" and name ~= "razord" then
+		name = "metacubexd"
+	end
+	luci.sys.exec(string.format([[uci set clash.config.dashboard_panel=%q; uci commit clash]], name))
+	luci.http.status(200, "OK")
 end
 
 function check_update_log()
 	luci.http.prepare_content("text/plain; charset=utf-8")
-	local fdp=tonumber(fs.readfile("/var/run/clashlog")) or 0
+	local clashlog_pos = fs.readfile("/var/run/clashlog") or "0"
+	local fdp=tonumber(clashlog_pos) or 0
 	local f=io.open("/tmp/clash_update.txt", "r+")
+	if not f then
+		luci.http.write("\0")
+		return
+	end
 	f:seek("set",fdp)
 	local a=f:read(2048000) or ""
 	fdp=f:seek()
@@ -413,8 +594,13 @@ end
 
 function check_geoip_log()
 	luci.http.prepare_content("text/plain; charset=utf-8")
-	local fdp=tonumber(fs.readfile("/var/run/geoiplog")) or 0
+	local geoiplog_pos = fs.readfile("/var/run/geoiplog") or "0"
+	local fdp=tonumber(geoiplog_pos) or 0
 	local f=io.open("/tmp/geoip_update.txt", "r+")
+	if not f then
+		luci.http.write("\0")
+		return
+	end
 	f:seek("set",fdp)
 	local a=f:read(2048000) or ""
 	fdp=f:seek()
@@ -430,7 +616,8 @@ end
 
 function logstatus_check()
 	luci.http.prepare_content("text/plain; charset=utf-8")
-	local fdp=tonumber(fs.readfile("/usr/share/clash/logstatus_check")) or 0
+	local logstatus_pos = fs.readfile("/usr/share/clash/logstatus_check") or "0"
+	local fdp=tonumber(logstatus_pos) or 0
 	local f=io.open("/usr/share/clash/clash.txt", "r+")
 	f:seek("set",fdp)
 	local a=f:read(2048000) or ""

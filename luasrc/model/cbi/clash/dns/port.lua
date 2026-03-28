@@ -84,6 +84,14 @@ o.default = 123456
 o.rmempty = false
 o.description = translate("Dashboard Secret")
 
+o = s:option(ListValue, "dashboard_panel", translate("Dashboard Panel"))
+o.default = "metacubexd"
+o:value("metacubexd", translate("MetaCubeXD"))
+o:value("yacd", translate("Yacd"))
+o:value("zashboard", translate("Zashboard"))
+o:value("razord", translate("Razord"))
+o.description = translate("Choose dashboard panel")
+
 o = s:option(ListValue, "p_mode", translate("Proxy Mode"))
 o.description = translate("Choose proxy mode")
 o:value("rule", translate("RULE"))

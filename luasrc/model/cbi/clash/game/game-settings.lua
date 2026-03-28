@@ -139,7 +139,7 @@ Button.render(e,t,a)
 end
 btnrm.write=function(a,t)
 local a=fs.unlink("/usr/share/clash/rules/g_rules/"..e[t].filename)
-HTTP.redirect(luci.dispatcher.build_url("admin", "services", "clash", "settings", "grules"))
+	HTTP.redirect(luci.dispatcher.build_url("admin", "services", "clash", "settings", "other"))
 end
 
 local t = {
@@ -159,7 +159,7 @@ o.write = function()
   m.uci:commit("clash")
   luci.sys.call("bash /usr/share/clash/load_groups.sh >/dev/null 2>&1 &")
   luci.sys.call("sleep 3")
-  HTTP.redirect(luci.dispatcher.build_url("admin", "services", "clash", "settings", "grules"))   
+	  HTTP.redirect(luci.dispatcher.build_url("admin", "services", "clash", "settings", "other"))   
 end
 
 o = s:option(Button, "Apply")
@@ -171,9 +171,8 @@ o.write = function()
 	SYS.call("/etc/init.d/clash restart >/dev/null 2>&1 &")
         luci.http.redirect(luci.dispatcher.build_url("admin", "services", "clash"))
   else
-  	HTTP.redirect(luci.dispatcher.build_url("admin", "services", "clash", "settings", "grules"))
+	  	HTTP.redirect(luci.dispatcher.build_url("admin", "services", "clash", "settings", "other"))
   end
 end
 
 return m, k, f
-

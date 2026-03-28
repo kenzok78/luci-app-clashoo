@@ -17,12 +17,11 @@ s = kr:section(TypedSection, "clash", translate("Subscription Config"))
 s.anonymous = true
 kr.pageaction = false
 
-o = s:option(ListValue, "subcri", translate("Subcription Type"))
+o = s:option(ListValue, "subcri", translate("Subscription Type"))
 o.default = clash
 o:value("clash", translate("clash"))
-o:value("ssr2clash", translate("ssr2clash"))
-o:value("v2clash", translate("v2clash"))
-o.description = translate("Select Subcription Type")
+o:value("meta", translate("clash meta"))
+o.description = translate("Select subscription type")
 
 o = s:option(Value, "config_name")
 o.title = translate("Config Name")
@@ -33,6 +32,7 @@ o.title = translate("Subcription Url")
 o.description = translate("Clash Subscription Address")
 o.rmempty = true
 o:depends("subcri", 'clash')
+o:depends("subcri", 'meta')
 
 
 o = s:option(Button,"update")
@@ -46,43 +46,7 @@ o.write = function()
   HTTP.redirect(DISP.build_url("admin", "services", "clash"))
 end
 o:depends("subcri", 'clash')
-
-o = s:option(Value, "ssr_url")
-o.title = translate("Subcription Url")
-o.placeholder = translate("https://www.example.com/link/QkjokZXktyyr35gfj")
-o.rmempty = true
-o:depends("subcri", 'ssr2clash')
-
-
-o = s:option(Button,"updatee")
-o.title = translate("Download Config")
-o.inputtitle = translate("Download Config")
-o.inputstyle = "reload"
-o.write = function()
-  kr.uci:commit("clash")
-  luci.sys.call("bash /usr/share/clash/clash.sh >>/usr/share/clash/clash.txt 2>&1 &")
-  HTTP.redirect(DISP.build_url("admin", "services", "clash"))
-end
-o:depends("subcri", 'ssr2clash')
-
-o = s:option(Value, "v2_url")
-o.title = translate("Subcription Url")
-o.placeholder = translate("https://www.example.com/link/QkjokZXktyyr35gfj")
-o.rmempty = true
-o:depends("subcri", 'v2clash')
-
-
-o = s:option(Button,"updateee")
-o.title = translate("Download Config")
-o.inputtitle = translate("Download Config")
-o.inputstyle = "reload"
-o.write = function()
-  kr.uci:commit("clash")
-  luci.sys.call("bash /usr/share/clash/clash.sh >>/usr/share/clash/clash.txt 2>&1 &")
-  HTTP.redirect(DISP.build_url("admin", "services", "clash"))
-end
-o:depends("subcri", 'v2clash')
-
+o:depends("subcri", 'meta')
 
 function IsYamlFile(e)
    e=e or""

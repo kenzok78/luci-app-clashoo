@@ -8,7 +8,7 @@ local fs = require "luci.clash"
 
 m = Map(clash, translate("Edit Game Rule & Group"))
 --m.pageaction = false
-m.redirect = luci.dispatcher.build_url("admin/services/clash/settings/grules")
+m.redirect = luci.dispatcher.build_url("admin", "services", "clash", "settings", "other")
 if m.uci:get(clash, sid) ~= "game" then
 	luci.http.redirect(m.redirect)
 	return

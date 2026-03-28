@@ -10,14 +10,15 @@ c_type=$(uci get clash.config.config_type 2>/dev/null)
 path=$(uci get clash.config.use_config 2>/dev/null)
 type=$(grep -F "${config_name}" "/usr/share/clashbackup/confit_list.conf" | awk -F '#' '{print $3}') 
 
-if [ $type == "clash" ] && [ ! -z $url ];then
+if [ "$type" = "clash" ] || [ "$type" = "meta" ];then
+if [ ! -z "$url" ];then
 
 	if [ $lang == "en" ] || [ $lang == "auto" ];then
 				echo "Updating Configuration..." >$REAL_LOG
 	elif [ $lang == "zh_cn" ];then
 				echo "开始更新配置" >$REAL_LOG
 	fi
-	wget --no-check-certificate --user-agent="Clash/OpenWRT" $url -O 2>&1 >1 $CONFIG_YAML
+	wget -q --no-check-certificate --user-agent="Clash/OpenWRT" "$url" -O "$CONFIG_YAML"
 	
 	if [ "$?" -eq "0" ]; then
 		if [ $lang == "en" ] || [ $lang == "auto" ];then
@@ -33,12 +34,13 @@ if [ $type == "clash" ] && [ ! -z $url ];then
 		use_config=$(uci get clash.config.use_config 2>/dev/null)
 
 		if [ "$c_type" -eq 1 ] && [ "$CONFIG_YAML" = "$use_config" ];then 
-		if pidof clash >/dev/null; then
+		if pidof clash >/dev/null || pidof mihomo >/dev/null || pidof clash-meta >/dev/null; then
 				/etc/init.d/clash restart 2>/dev/null
 		fi
 		fi		
 			
 	fi
+fi
 fi
 
 if [ $type == "ssr2clash" ] && [ ! -z $url ];then
@@ -48,7 +50,7 @@ if [ $type == "ssr2clash" ] && [ ! -z $url ];then
 	elif [ $lang == "zh_cn" ];then
 				echo "开始更新配置" >$REAL_LOG
 	fi
-	wget --no-check-certificate --user-agent="Clash/OpenWRT" "https://ssrsub2clashr.herokuapp.com/ssrsub2clash?sub=$url" -O 2>&1 >1 $CONFIG_YAML
+	wget -q --no-check-certificate --user-agent="Clash/OpenWRT" "https://ssrsub2clashr.herokuapp.com/ssrsub2clash?sub=$url" -O "$CONFIG_YAML"
 	
 	if [ "$?" -eq "0" ]; then
 	
@@ -102,7 +104,7 @@ if [ $type == "ssr2clash" ] && [ ! -z $url ];then
 		use_config=$(uci get clash.config.use_config 2>/dev/null)
 
 		if [ "$c_type" -eq 1 ] && [ "$CONFIG_YAML" = "$use_config" ];then 
-		if pidof clash >/dev/null; then
+		if pidof clash >/dev/null || pidof mihomo >/dev/null || pidof clash-meta >/dev/null; then
 				/etc/init.d/clash restart 2>/dev/null
 		fi
 		fi		
@@ -116,7 +118,7 @@ if [ $type == "v2clash" ] && [ ! -z $url ];then
 	elif [ $lang == "zh_cn" ];then
 				echo "开始更新配置" >$REAL_LOG
 	fi
-	wget --no-check-certificate --user-agent="Clash/OpenWRT" "https://tgbot.lbyczf.com/v2rayn2clash?url=$url" -O 2>&1 >1 $CONFIG_YAML
+	wget -q --no-check-certificate --user-agent="Clash/OpenWRT" "https://tgbot.lbyczf.com/v2rayn2clash?url=$url" -O "$CONFIG_YAML"
 	
 	if [ "$?" -eq "0" ]; then
 		if [ $lang == "en" ] || [ $lang == "auto" ];then
@@ -132,11 +134,10 @@ if [ $type == "v2clash" ] && [ ! -z $url ];then
 		use_config=$(uci get clash.config.use_config 2>/dev/null)
 
 		if [ "$c_type" -eq 1 ] && [ "$CONFIG_YAML" = "$use_config" ];then 
-		if pidof clash >/dev/null; then
+		if pidof clash >/dev/null || pidof mihomo >/dev/null || pidof clash-meta >/dev/null; then
 				/etc/init.d/clash restart 2>/dev/null
 		fi
 		fi		
 			
 	fi
 fi
-

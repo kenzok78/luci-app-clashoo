@@ -9,6 +9,22 @@ subtype=$(uci get clash.config.subcri 2>/dev/null)
 REAL_LOG="/usr/share/clash/clash_real.txt" 
 lang=$(uci get luci.main.lang 2>/dev/null)
 CONFIG_YAML="/usr/share/clash/config/sub/${config_name}.yaml" 
+
+ensure_system_dns() {
+	local test_host="github.com"
+	if nslookup "$test_host" 127.0.0.1 >/dev/null 2>&1 || nslookup "$test_host" >/dev/null 2>&1; then
+		return 0
+	fi
+	uci delete dhcp.@dnsmasq[0].server >/dev/null 2>&1
+	uci set dhcp.@dnsmasq[0].noresolv='0' >/dev/null 2>&1
+	uci del_list dhcp.@dnsmasq[0].server='127.0.0.1#' >/dev/null 2>&1
+	uci del_list dhcp.@dnsmasq[0].server='127.0.0.1#5300' >/dev/null 2>&1
+	uci add_list dhcp.@dnsmasq[0].server='119.29.29.29' >/dev/null 2>&1
+	uci add_list dhcp.@dnsmasq[0].server='223.5.5.5' >/dev/null 2>&1
+	uci commit dhcp >/dev/null 2>&1
+	/etc/init.d/dnsmasq restart >/dev/null 2>&1
+	sleep 2
+}
  
 if  [ $config_name == "" ] || [ -z $config_name ];then
 
@@ -31,29 +47,21 @@ fi
 
 check_name=$(grep -F "${config_name}.yaml" "/usr/share/clashbackup/confit_list.conf")
 
+if [ -n "$check_name" ]; then
+	sed -i "\#^${config_name}\\.yaml#d" /usr/share/clashbackup/confit_list.conf 2>/dev/null
+	rm -f "$CONFIG_YAML" 2>/dev/null
+fi
 
-if [ ! -z $check_name ];then
-   
-	if [ $lang == "en" ] || [ $lang == "auto" ];then
-				echo "Config with same name exist, please rename and download again" >$REAL_LOG
+ensure_system_dns
+
+if [ $lang == "en" ] || [ $lang == "auto" ];then
+			echo "Downloading Configuration..." >$REAL_LOG
 	elif [ $lang == "zh_cn" ];then
-				echo "已存在同名配置，请重命名名配置重新下载" >$REAL_LOG
-	fi
-	sleep 5
-	echo "Clash for OpenWRT" >$REAL_LOG
-	exit 0	
-
-   
-else
-
-	if [ $lang == "en" ] || [ $lang == "auto" ];then
-				echo "Downloading Configuration..." >$REAL_LOG
-	elif [ $lang == "zh_cn" ];then
-				echo "开始下载配置" >$REAL_LOG
+			echo "开始下载配置" >$REAL_LOG
 	fi
 	sleep 1
-		
-	if [ "$subtype" = "clash" ];then
+
+	if [ "$subtype" = "clash" ] || [ "$subtype" = "meta" ];then
 	wget -q -c4 --no-check-certificate --user-agent="Clash/OpenWRT" "$clash_url" -O "$CONFIG_YAML"
 	if [ "$?" -eq "0" ]; then
 	echo "${config_name}.yaml#$clash_url#$subtype" >>/usr/share/clashbackup/confit_list.conf
@@ -121,5 +129,3 @@ else
 		sleep 2
 		echo "Clash for OpenWRT" >$REAL_LOG
 	fi
-   
-fi   
