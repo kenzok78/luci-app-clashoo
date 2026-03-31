@@ -267,50 +267,7 @@ body.dark .clash-hero-title,
 
 <fieldset class="cbi-section">
 	  <div class="clash-hero">
-		  <svg class="clash-hero-logo" viewBox="0 0 256 256" aria-hidden="true">
-			  <defs>
-				  <linearGradient id="dcatBodyGrad" x1="0" y1="0" x2="0" y2="1">
-					  <stop offset="0%" stop-color="#355b90"/>
-					  <stop offset="100%" stop-color="#2f4f84"/>
-				  </linearGradient>
-				  <linearGradient id="dcatHatGrad" x1="0" y1="0" x2="0" y2="1">
-					  <stop offset="0%" stop-color="#8a5b3a"/>
-					  <stop offset="100%" stop-color="#6a442c"/>
-				  </linearGradient>
-				  <linearGradient id="dcatStrapGrad" x1="0" y1="0" x2="1" y2="0">
-					  <stop offset="0%" stop-color="#5a3a25"/>
-					  <stop offset="100%" stop-color="#3f2a1c"/>
-				  </linearGradient>
-				  <filter id="dcatShadow" x="-30%" y="-30%" width="160%" height="160%">
-					  <feDropShadow dx="0" dy="4" stdDeviation="3" flood-color="#000" flood-opacity="0.15"/>
-				  </filter>
-			  </defs>
-			  <g filter="url(#dcatShadow)">
-				  <path d="M80 62 Q100 40 122 94 Q128 104 134 94 Q156 40 176 62 Q198 84 208 220 Q208 229 201 230 Q128 234 55 230 Q48 229 48 220 Q58 84 80 62 Z" fill="url(#dcatBodyGrad)"/>
-				  <path d="M44 224 C30 224 20 213 20 198 C20 184 30 173 45 170 C56 168 64 174 64 181 C64 187 59 191 53 194 C45 198 42 203 42 210 C42 216 47 222 54 224 Z" fill="#30558c"/>
-				  <ellipse cx="128" cy="58" rx="46" ry="16" fill="url(#dcatHatGrad)"/>
-				  <path d="M98 58 C98 42 112 30 128 30 C144 30 158 42 158 58 L158 66 L98 66 Z" fill="url(#dcatHatGrad)"/>
-				  <rect x="96" y="56" width="64" height="8" rx="4" fill="#4c311f"/>
-				  <ellipse cx="100" cy="126" rx="17" ry="14" fill="#f3f6fb"/>
-				  <ellipse cx="156" cy="126" rx="17" ry="14" fill="#f3f6fb"/>
-				  <ellipse cx="104" cy="126" rx="8" ry="10" fill="#2a4e84"/>
-				  <ellipse cx="152" cy="126" rx="8" ry="10" fill="#2a4e84"/>
-				  <circle cx="107" cy="121" r="2.3" fill="#ffffff"/>
-				  <circle cx="149" cy="121" r="2.3" fill="#ffffff"/>
-				  <path d="M118 153 Q128 162 138 153" fill="none" stroke="#1d3f72" stroke-width="3.6" stroke-linecap="round"/>
-				  <path d="M128 149 q-5 7 -10 7" fill="none" stroke="#1d3f72" stroke-width="3.4" stroke-linecap="round"/>
-				  <path d="M128 149 q5 7 10 7" fill="none" stroke="#1d3f72" stroke-width="3.4" stroke-linecap="round"/>
-				  <path d="M75 139 C58 139 47 141 34 145" fill="none" stroke="#233f6f" stroke-width="3.8" stroke-linecap="round"/>
-				  <path d="M74 150 C56 150 46 153 32 160" fill="none" stroke="#233f6f" stroke-width="3.8" stroke-linecap="round"/>
-				  <path d="M181 139 C198 139 209 141 222 145" fill="none" stroke="#233f6f" stroke-width="3.8" stroke-linecap="round"/>
-				  <path d="M182 150 C200 150 210 153 224 160" fill="none" stroke="#233f6f" stroke-width="3.8" stroke-linecap="round"/>
-				  <rect x="58" y="171" width="140" height="13" rx="6.5" fill="url(#dcatStrapGrad)"/>
-				  <rect x="110" y="171" width="36" height="13" rx="6.5" fill="#3d281b"/>
-				  <rect x="152" y="170" width="15" height="12" rx="6" fill="none" stroke="#8b929c" stroke-width="2.5"/>
-				  <circle cx="128" cy="187" r="8" fill="#e2b13b" stroke="#b47f1e" stroke-width="2"/>
-				  <path d="M124 187 q4 4 8 0" fill="none" stroke="#7a5418" stroke-width="2" stroke-linecap="round"/>
-			  </g>
-		  </svg>
+		  <img src="/luci-static/clash/logo.png" class="clash-hero-logo" style="object-fit:contain;border-radius:8px" onerror="this.style.display='none'" alt="Clash" />
 		  <p width="100%" align="center" id="_realtimelog" class="clash-hero-title">mihomo</p>
 		  <p width="100%" align="center" class="clash-hero-subtitle"><%:Rule-based Custom Proxy Client%></p>
 		  <p width="100%" align="center" id="_downloadnew"></p>
@@ -594,8 +551,8 @@ body.dark .clash-hero-title,
 
 			if (!shouldSkipRender(clash)) {
 				clash.innerHTML = status.clash
-					? '<div class="clash-center-box"><span class="btn" style="background:#1f8b4c;color:#fff;padding:5px 10px;"><%:RUNNING%></span><button class="btn cbi-button" onclick="clashStop()"><%:Stop%></button></div>'
-					: '<div class="clash-center-box"><span class="btn" style="background:#b58900;color:#fff;padding:5px 10px;"><%:STOPPED%></span><button class="btn cbi-button cbi-button-apply" onclick="clashStart()"><%:Start%></button></div>';
+					? '<div class="clash-center-box"><span class="btn" style="background:#1f8b4c;color:#fff;padding:5px 10px;"><%:RUNNING%></span><button type="button" class="btn cbi-button" style="background:#c0392b;color:#fff;padding:5px 12px;" onclick="clashStop()"><%:Stop%></button></div>'
+					: '<div class="clash-center-box"><span class="btn" style="background:#b58900;color:#fff;padding:5px 10px;"><%:STOPPED%></span><button type="button" class="btn cbi-button" style="background:#1f8b4c;color:#fff;padding:5px 12px;" onclick="clashStart()"><%:Start%></button></div>';
 			}
 
 			if (!shouldSkipRender(ip)) {
