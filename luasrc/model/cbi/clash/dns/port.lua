@@ -1,62 +1,60 @@
 local NXFS = require "nixio.fs"
 local SYS  = require "luci.sys"
-local HTTP = require "luci.http"
-local DISP = require "luci.dispatcher"
-local UTIL = require "luci.util"
 local uci = require("luci.model.uci").cursor()
 
 m = Map("clash")
-s = m:section(TypedSection, "clash")
+s = m:section(TypedSection, "clash", "入站设置")
 m.pageaction = false
 s.anonymous = true
+s.description = "参考 Nikki 入站配置布局，按需修改端口即可。"
 
 o = s:option(Value, "http_port")
-o.title = translate("Http Port")
-o.default = 7890
+o.title = "HTTP 代理端口"
+o.default = 8080
 o.datatype = "port"
 o.rmempty = false
-o.description = translate("Http Port")
 
 o = s:option(Value, "socks_port")
-o.title = translate("Socks Port")
+o.title = "SOCKS 代理端口"
+o.default = 1080
+o.datatype = "port"
+o.rmempty = false
+
+o = s:option(Value, "redir_port")
+o.title = "TCP 转发端口"
 o.default = 7891
 o.datatype = "port"
 o.rmempty = false
-o.description = translate("Socks Port")
 
-o = s:option(Value, "redir_port")
-o.title = translate("Redir Port")
+o = s:option(Value, "mixed_port")
+o.title = "混合端口（HTTP(S)/SOCKS5）"
+o.default = 7890
+o.datatype = "port"
+o.rmempty = false
+
+o = s:option(Value, "tproxy_port")
+o.title = "UDP 转发端口"
 o.default = 7892
 o.datatype = "port"
 o.rmempty = false
-o.description = translate("Redir Port")
-
-o = s:option(Value, "mixed_port")
-o.title = translate("Mixed Port")
-o.default = 7893
-o.datatype = "port"
-o.rmempty = false
-o.description = translate("Mixed Port")
 
 o = s:option(ListValue, "allow_lan")
-o.title = translate("Allow Lan")
+o.title = "允许局域网访问"
 o.default = true
 o.rmempty = false
-o:value("true", "true")
-o:value("false", "false")
-o.description = translate("Allow Lan")
+o:value("true", "启用")
+o:value("false", "禁用")
 
 o = s:option(ListValue, "enable_ipv6")
-o.title = translate("Enable IPv6")
+o.title = "启用 IPv6"
 o.default = false
 o.rmempty = false
-o:value("true", "true")
-o:value("false", "false")
-o.description = translate("Enable IPv6")
+o:value("true", "启用")
+o:value("false", "禁用")
 
 o = s:option(Value, "bind_addr")
-o.title = translate("Bind Address")
-o:value("*",  translate("Bind All IP Addresses"))
+o.title = "监听地址"
+o:value("*",  "绑定所有 IP 地址")
 luci.ip.neighbors({ family = 4 }, function(entry)
        if entry.reachable then
                o:value(entry.dest:string())
@@ -67,54 +65,36 @@ luci.ip.neighbors({ family = 6 }, function(entry)
                o:value(entry.dest:string())
        end
 end)
-o.description = translate("Bind Address")
 o:depends("allow_lan", "true")
 
 
 o = s:option(Value, "dash_port")
-o.title = translate("Dashboard Port")
+o.title = "外部控制监听端口"
 o.default = 9090
 o.datatype = "port"
 o.rmempty = false
-o.description = translate("Dashboard Port")
 
 o = s:option(Value, "dash_pass")
-o.title = translate("Dashboard Secret")
+o.title = "外部控制密钥"
 o.default = 123456
 o.rmempty = false
-o.description = translate("Dashboard Secret")
 
-o = s:option(ListValue, "dashboard_panel", translate("Dashboard Panel"))
-o.default = "metacubexd"
-o:value("metacubexd", translate("MetaCubeXD"))
-o:value("yacd", translate("Yacd"))
-o:value("zashboard", translate("Zashboard"))
-o:value("razord", translate("Razord"))
-o.description = translate("Choose dashboard panel")
-
-o = s:option(ListValue, "p_mode", translate("Proxy Mode"))
-o.description = translate("Choose proxy mode")
-o:value("rule", translate("RULE"))
-o:value("global", translate("GLOBAL"))
-o:value("Script", translate("SCRIPT"))
-o:value("direct", translate("DIRECT"))
-o.default = "Rule"
-
-o = s:option(ListValue, "level", translate("Log level"))
-o.description = translate("Choose Log Level")
-o:value("info", "info")
-o:value("silent", "silent")
-o:value("warning", "warning")
-o:value("error", "error")
-o:value("debug", "debug")
+o = s:option(ListValue, "level", "日志级别")
+o.title = "日志级别"
+o.description = "选择日志级别"
+o:value("info", "信息")
+o:value("silent", "静默")
+o:value("warning", "警告")
+o:value("error", "错误")
+o:value("debug", "调试")
 
 o = s:option(Button, "Apply")
-o.title = luci.util.pcdata(translate("Save & Apply"))
-o.inputtitle = translate("Save & Apply")
+o.title = luci.util.pcdata("保存并应用")
+o.inputtitle = "保存并应用"
 o.inputstyle = "apply"
 o.write = function()
 m.uci:commit("clash")
-if luci.sys.call("pidof clash >/dev/null") == 0 then
+if luci.sys.call("pidof clash >/dev/null || pidof mihomo >/dev/null || pidof clash-meta >/dev/null") == 0 then
 	SYS.call("/etc/init.d/clash restart >/dev/null 2>&1 &")
         luci.http.redirect(luci.dispatcher.build_url("admin", "services", "clash"))
 else

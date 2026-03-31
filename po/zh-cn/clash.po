@@ -72,7 +72,7 @@ msgid "Update Config"
 msgstr "更新配置"
 
 msgid "NOT RUNNING"
-msgstr "末运行"
+msgstr "未运行"
 
 msgid "Enabled Custom Rule"
 msgstr "启用自定义规则"
@@ -99,10 +99,10 @@ msgid "enabled"
 msgstr "启用"
 
 msgid "Subcription Type"
-msgstr "服务器订阅类型"
+msgstr "订阅类型"
 
 msgid "Select Subcription Type"
-msgstr "选择服务器订阅类型"
+msgstr "选择订阅类型"
 
 msgid "disabled"
 msgstr "停用"
@@ -1277,3 +1277,84 @@ msgstr "不带协议"
 
 msgid "GeoIP Source"
 msgstr "GeoIP下载连接"
+
+msgid "Subscription Type"
+msgstr "订阅类型"
+
+msgid "Select subscription type"
+msgstr "选择订阅类型"
+
+msgid "Clash Subscription Address (support multiple URLs)"
+msgstr "Clash 订阅地址（支持多个链接）"
+
+msgid "Dashboard Panel"
+msgstr "面板类型"
+
+msgid "Choose dashboard panel"
+msgstr "选择面板类型"
+
+msgid "MetaCubeXD Panel"
+msgstr "MetaCubeXD 面板"
+
+msgid "Yacd Panel"
+msgstr "Yacd 面板"
+
+msgid "Zashboard Panel"
+msgstr "Zashboard 面板"
+
+msgid "Razord Panel"
+msgstr "Razord 面板"
+
+msgid "Inbound Settings"
+msgstr "入站配置"
+
+msgid "fake ip"
+msgstr "fake ip"
+
+msgid "fake ip range"
+msgstr "fake ip 范围"
+
+msgid "Set fake ip range"
+msgstr "设置 fake ip 范围"
+
+msgid "fake ip filter"
+msgstr "fake ip 过滤器"
+
+msgid "fake ip filter list"
+msgstr "fake ip 过滤器列表"
+
+msgid "Select Stack Mode (works in Tun mode)"
+msgstr "选择协议栈（仅 Tun 模式生效）"
+
+msgid "NOT INSTALLED"
+msgstr "未安装"
+
+msgid "Subscription URL"
+msgstr "订阅链接"
+
+msgid "Optional base name. One subscription URL maps to one config file, and multiple URLs auto-create suffix names"
+msgstr "可选基础配置名。一个订阅链接对应一个配置文件，多个链接会自动追加后缀"
+
+msgid "One subscription URL maps to one config file"
+msgstr "一个订阅链接对应一个配置文件"
+
+msgid "Save & Apply"
+msgstr "保存并应用"
+
+msgid "Back to Overview"
+msgstr "返回概览"
+
+msgid "Collecting data..."
+msgstr "正在收集数据..."
+
+msgid "RUNNING"
+msgstr "运行中"
+
+msgid "STOPPED"
+msgstr "已停止"
+
+msgid "Disable"
+msgstr "禁用"
+
+msgid "CPU Model"
+msgstr "CPU 架构"

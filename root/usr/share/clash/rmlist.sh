@@ -1,13 +1,16 @@
-#!/bin/bash /etc/rc.common
-. /lib/functions.sh
+#!/bin/sh
 
-name=$(uci get clash.config.config_name_remove 2>/dev/null)
-check_match_name=$(grep -F "$name" "/usr/share/clashbackup/confit_list.conf") 
-line_no=$(grep -n "$check_match_name" /usr/share/clashbackup/confit_list.conf |awk -F ':' '{print $1}')
-if [ ! -z $check_match_name ];then
-sed -i "${line_no}d" /usr/share/clashbackup/confit_list.conf
-rm -rf /usr/share/clash/config/sub/${name}
-sed -i '/^$/d' /usr/share/clashbackup/confit_list.conf
-rm -rf /usr/share/clash/config/sub/${name}	
-fi	 
+name="$(uci -q get clash.config.config_name_remove 2>/dev/null)"
+LIST_FILE="/usr/share/clashbackup/confit_list.conf"
 
+[ -n "$name" ] || exit 0
+[ -f "$LIST_FILE" ] || exit 0
+
+tmp_file="/tmp/clash_rmlist_$$.tmp"
+awk -F '#' -v n="$name" '$1 != n { print $0 }' "$LIST_FILE" > "$tmp_file"
+mv "$tmp_file" "$LIST_FILE"
+sed -i '/^$/d' "$LIST_FILE"
+
+rm -f "/usr/share/clash/config/sub/$name" >/dev/null 2>&1
+
+exit 0

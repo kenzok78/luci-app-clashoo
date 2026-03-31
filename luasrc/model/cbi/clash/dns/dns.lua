@@ -23,15 +23,10 @@ y = s:option(Value, "interf_name", translate("Set Interface Name"))
 y.description = translate("Set Interface Name")
 y:depends("interf", 1)
 
-y = s:option(Flag, "tun_mode", translate("Tun Mode"))
-y.default = 0
-y.description = translate("Enable Tun and make sure you are using tun supported core")
-
 y = s:option(ListValue, "stack", translate("Stack"))
 y:value("system", translate("system"))
 y:value("gvisor", translate("gvisor"))
-y.description = translate("Select Stack Mode")
-y:depends("tun_mode", 1)
+y.description = translate("Select Stack Mode (works in Tun mode)")
 
 y = s:option(Flag, "enable_dns", translate("Enable Clash DNS"))
 y.default = 1
@@ -48,16 +43,16 @@ y.description = translate("Default Nameserver List")
 
 y = s:option(ListValue, "enhanced_mode", translate("Enhanced Mode"))
 y:value("redir-host", translate("Redir Host"))
-y:value("fake-ip", translate("Fake IP"))
+y:value("fake-ip", translate("fake ip"))
 y.description = translate("Select Enhanced Mode")
 
-y = s:option(Value, "fake_ip_range", translate("Fake IP Range"))
-y.description = translate("Set Fake IP Range")
+y = s:option(Value, "fake_ip_range", translate("fake ip range"))
+y.description = translate("Set fake ip range")
 y.default  = "198.18.0.1/16"
 y:depends("enhanced_mode", "fake-ip")
 
-y = s:option(DynamicList, "fake_ip_filter", translate("Fake IP Filter"))
-y.description = translate("Fake IP Filter List")
+y = s:option(DynamicList, "fake_ip_filter", translate("fake ip filter"))
+y.description = translate("fake ip filter list")
 y.default  = "*.lan"
 y:depends("enhanced_mode", "fake-ip")
 
@@ -186,4 +181,3 @@ end
 
 
 return m
-

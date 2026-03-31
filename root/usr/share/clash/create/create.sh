@@ -821,6 +821,14 @@ fi
 		TEMP_FILE="/tmp/clashdns.yaml"
 		interf=$(uci get clash.config.interf 2>/dev/null)
 		enhanced_mode=$(uci get clash.config.enhanced_mode 2>/dev/null)
+		geoip_format=$(uci get clash.config.geoip_format 2>/dev/null)
+		geodata_loader=$(uci get clash.config.geodata_loader 2>/dev/null)
+		geosite_url=$(uci get clash.config.geosite_url 2>/dev/null)
+		geoip_mmdb_url=$(uci get clash.config.geoip_mmdb_url 2>/dev/null)
+		geoip_dat_url=$(uci get clash.config.geoip_dat_url 2>/dev/null)
+		geoip_asn_url=$(uci get clash.config.geoip_asn_url 2>/dev/null)
+		[ -z "$geoip_format" ] && geoip_format="mmdb"
+		[ -z "$geodata_loader" ] && geodata_loader="standard"
 
 		rm -rf $TEMP_FILE 2>/dev/null
 		
@@ -850,6 +858,25 @@ fi
 		fi
 
 cat $CONFIG_START >> $TEMP_FILE 2>/dev/null
+
+if [ "$core" -eq 2 ] || [ "$core" -eq 3 ]; then
+	if [ "$geoip_format" = "dat" ]; then
+		echo "geodata-mode: true" >> "$TEMP_FILE"
+	else
+		echo "geodata-mode: false" >> "$TEMP_FILE"
+	fi
+	echo "geodata-loader: ${geodata_loader}" >> "$TEMP_FILE"
+
+	if [ -n "$geosite_url$geoip_mmdb_url$geoip_dat_url$geoip_asn_url" ]; then
+		echo "geox-url:" >> "$TEMP_FILE"
+		[ -n "$geosite_url" ] && echo "  geosite: \"${geosite_url}\"" >> "$TEMP_FILE"
+		[ -n "$geoip_mmdb_url" ] && echo "  mmdb: \"${geoip_mmdb_url}\"" >> "$TEMP_FILE"
+		[ -n "$geoip_dat_url" ] && echo "  geoip: \"${geoip_dat_url}\"" >> "$TEMP_FILE"
+		[ -n "$geoip_asn_url" ] && echo "  asn: \"${geoip_asn_url}\"" >> "$TEMP_FILE"
+	fi
+
+	sed -i -e "\$a " "$TEMP_FILE" 2>/dev/null
+fi
 
 if [ "$interf" -eq 1 ] && [ ! -z "$interf_name" ] ;then
 cat >> "/tmp/interf_name.yaml" <<-EOF

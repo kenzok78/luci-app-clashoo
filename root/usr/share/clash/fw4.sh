@@ -26,6 +26,16 @@ config_redir_port() {
 	uci_get clash.config.redir_port
 }
 
+config_tproxy_port() {
+	local port
+	port="$(uci_get clash.config.tproxy_port)"
+	if [ -n "$port" ]; then
+		printf '%s\n' "$port"
+	else
+		config_redir_port
+	fi
+}
+
 config_enable_udp() {
 	uci_get clash.config.enable_udp
 }
@@ -114,8 +124,9 @@ remove_local_output_rule() {
 }
 
 generate_rules() {
-	local redir_port enable_udp access_control fake_ip_range proxy_lan_ips reject_lan_ips
+	local redir_port tproxy_port enable_udp access_control fake_ip_range proxy_lan_ips reject_lan_ips
 	redir_port="$(config_redir_port)"
+	tproxy_port="$(config_tproxy_port)"
 	enable_udp="$(config_enable_udp)"
 	access_control="$(config_access_control)"
 	fake_ip_range="$(config_fake_ip_range)"
@@ -158,7 +169,6 @@ EOF
 
 	cat > "$DSTNAT_RULES" <<EOF
 ip daddr @clash_localnetwork return
-ip daddr @clash_china return
 $( [ "$access_control" = "1" ] && printf '%s\n' 'ip saddr != @clash_proxy_lan return' )
 $( [ "$access_control" = "2" ] && printf '%s\n' 'ip saddr @clash_reject_lan return' )
 meta l4proto tcp redirect to :${redir_port}
@@ -167,10 +177,9 @@ EOF
 	if bool_enabled "$enable_udp"; then
 		cat > "$MANGLE_RULES" <<EOF
 ip daddr @clash_localnetwork return
-ip daddr @clash_china return
 $( [ "$access_control" = "1" ] && printf '%s\n' 'ip saddr != @clash_proxy_lan return' )
 $( [ "$access_control" = "2" ] && printf '%s\n' 'ip saddr @clash_reject_lan return' )
-meta l4proto udp tproxy to :${redir_port} meta mark set ${PROXY_FWMARK} accept
+meta l4proto udp tproxy to :${tproxy_port} meta mark set ${PROXY_FWMARK} accept
 EOF
 	else
 		: > "$MANGLE_RULES"

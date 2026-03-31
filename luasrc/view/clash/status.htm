@@ -137,28 +137,76 @@
 	text-align: center;
 }
 
-.clash-panel-note {
-	font-size: 12px;
-	line-height: 1.1;
-}
-
-.clash-panel-box {
-	position: relative;
-	flex-wrap: nowrap;
-}
-
-.clash-panel-box .clash-panel-tag {
-	position: absolute;
-	left: calc(50% + 117px);
-	top: 50%;
-	transform: translateY(-50%);
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	min-width: 160px;
+.clash-hero {
 	text-align: center;
-	white-space: nowrap;
+	padding: 0;
 }
+
+.clash-hero p {
+	margin: 0;
+}
+
+.clash-hero-logo {
+	width: 60px;
+	height: 60px;
+	display: block;
+	margin: 0 auto 1px;
+	object-fit: contain;
+	border-radius: 0;
+}
+
+.clash-hero-title {
+	color: #2b3f66;
+	font-size: 16px;
+	line-height: 1.22;
+	font-weight: 600;
+	letter-spacing: 0.3px;
+	margin: 0;
+}
+
+.clash-hero-subtitle {
+	color: inherit;
+	font-size: inherit;
+	line-height: 1.22;
+	opacity: 1;
+	margin: 0;
+}
+
+.clash-hero-title-running {
+	color: #1f8b4c !important;
+}
+
+#_downloadnew {
+	margin-top: 1px;
+	line-height: 1.2;
+}
+
+#_downloadnew:empty {
+	display: none;
+}
+
+.clash-panel-actions {
+	display: flex;
+	align-items: center;
+	justify-content: flex-start;
+	gap: 10px;
+	flex-wrap: nowrap;
+	width: 210px;
+	max-width: 100%;
+	margin-left: 0;
+	box-sizing: border-box;
+}
+
+.clash-panel-actions .btn.cbi-button {
+	min-width: 118px;
+	height: 40px;
+	padding: 0 14px !important;
+	border-radius: 8px;
+	font-size: 15px;
+	line-height: 40px;
+	text-align: center;
+}
+
 
 @media only screen and (max-width: 1200px) {
 	.clash-center-box {
@@ -167,37 +215,107 @@
 	}
 }
 
-@media only screen and (max-width: 900px) {
+@media only screen and (max-width: 1080px) {
 	.clash-center-box {
 		width: 100%;
 		margin-left: 0;
 		justify-content: flex-start;
 	}
 
-	.clash-panel-box {
-		flex-wrap: wrap;
+	.clash-panel-actions {
+		width: 210px;
+		margin-left: 0;
+		justify-content: flex-start;
+		flex-wrap: nowrap;
+		gap: 8px;
 	}
 
-	.clash-panel-box .clash-panel-tag {
-		position: static;
-		transform: none;
+	.clash-panel-actions .btn.cbi-button {
+		flex: 1 1 0;
+		min-width: 0;
+		height: 36px;
+		line-height: 36px;
+		font-size: 13px;
+		padding: 0 10px !important;
 	}
+
+	.clash-hero-logo {
+		width: 52px;
+		height: 52px;
+		margin-top: 0;
+		margin-bottom: 1px;
+	}
+
+	.clash-hero-title {
+		font-size: 15px;
+	}
+
+}
+
+@media (prefers-color-scheme: dark) {
+	.clash-hero-title {
+		color: #b7caea;
+	}
+}
+
+body.dark .clash-hero-title,
+.dark .clash-hero-title {
+	color: #b7caea;
 }
 
 </style>
 
 <fieldset class="cbi-section">
-	  <p width="100%" align="center"><font color="blue"><b id="_realtimelog">Clash for OpenWRT</b></font></p>
-	  <p width="100%" align="center"><%:Rule-based Custom Proxy Client%></p>
-	  <p width="100%" align="center" id="_downloadnew"></p>
-	  
-</fieldset>
-
-<fieldset class="cbi-section">
-	
-<div class="pure-g status">
-
+	  <div class="clash-hero">
+		  <svg class="clash-hero-logo" viewBox="0 0 256 256" aria-hidden="true">
+			  <defs>
+				  <linearGradient id="dcatBodyGrad" x1="0" y1="0" x2="0" y2="1">
+					  <stop offset="0%" stop-color="#355b90"/>
+					  <stop offset="100%" stop-color="#2f4f84"/>
+				  </linearGradient>
+				  <linearGradient id="dcatHatGrad" x1="0" y1="0" x2="0" y2="1">
+					  <stop offset="0%" stop-color="#8a5b3a"/>
+					  <stop offset="100%" stop-color="#6a442c"/>
+				  </linearGradient>
+				  <linearGradient id="dcatStrapGrad" x1="0" y1="0" x2="1" y2="0">
+					  <stop offset="0%" stop-color="#5a3a25"/>
+					  <stop offset="100%" stop-color="#3f2a1c"/>
+				  </linearGradient>
+				  <filter id="dcatShadow" x="-30%" y="-30%" width="160%" height="160%">
+					  <feDropShadow dx="0" dy="4" stdDeviation="3" flood-color="#000" flood-opacity="0.15"/>
+				  </filter>
+			  </defs>
+			  <g filter="url(#dcatShadow)">
+				  <path d="M80 62 Q100 40 122 94 Q128 104 134 94 Q156 40 176 62 Q198 84 208 220 Q208 229 201 230 Q128 234 55 230 Q48 229 48 220 Q58 84 80 62 Z" fill="url(#dcatBodyGrad)"/>
+				  <path d="M44 224 C30 224 20 213 20 198 C20 184 30 173 45 170 C56 168 64 174 64 181 C64 187 59 191 53 194 C45 198 42 203 42 210 C42 216 47 222 54 224 Z" fill="#30558c"/>
+				  <ellipse cx="128" cy="58" rx="46" ry="16" fill="url(#dcatHatGrad)"/>
+				  <path d="M98 58 C98 42 112 30 128 30 C144 30 158 42 158 58 L158 66 L98 66 Z" fill="url(#dcatHatGrad)"/>
+				  <rect x="96" y="56" width="64" height="8" rx="4" fill="#4c311f"/>
+				  <ellipse cx="100" cy="126" rx="17" ry="14" fill="#f3f6fb"/>
+				  <ellipse cx="156" cy="126" rx="17" ry="14" fill="#f3f6fb"/>
+				  <ellipse cx="104" cy="126" rx="8" ry="10" fill="#2a4e84"/>
+				  <ellipse cx="152" cy="126" rx="8" ry="10" fill="#2a4e84"/>
+				  <circle cx="107" cy="121" r="2.3" fill="#ffffff"/>
+				  <circle cx="149" cy="121" r="2.3" fill="#ffffff"/>
+				  <path d="M118 153 Q128 162 138 153" fill="none" stroke="#1d3f72" stroke-width="3.6" stroke-linecap="round"/>
+				  <path d="M128 149 q-5 7 -10 7" fill="none" stroke="#1d3f72" stroke-width="3.4" stroke-linecap="round"/>
+				  <path d="M128 149 q5 7 10 7" fill="none" stroke="#1d3f72" stroke-width="3.4" stroke-linecap="round"/>
+				  <path d="M75 139 C58 139 47 141 34 145" fill="none" stroke="#233f6f" stroke-width="3.8" stroke-linecap="round"/>
+				  <path d="M74 150 C56 150 46 153 32 160" fill="none" stroke="#233f6f" stroke-width="3.8" stroke-linecap="round"/>
+				  <path d="M181 139 C198 139 209 141 222 145" fill="none" stroke="#233f6f" stroke-width="3.8" stroke-linecap="round"/>
+				  <path d="M182 150 C200 150 210 153 224 160" fill="none" stroke="#233f6f" stroke-width="3.8" stroke-linecap="round"/>
+				  <rect x="58" y="171" width="140" height="13" rx="6.5" fill="url(#dcatStrapGrad)"/>
+				  <rect x="110" y="171" width="36" height="13" rx="6.5" fill="#3d281b"/>
+				  <rect x="152" y="170" width="15" height="12" rx="6" fill="none" stroke="#8b929c" stroke-width="2.5"/>
+				  <circle cx="128" cy="187" r="8" fill="#e2b13b" stroke="#b47f1e" stroke-width="2"/>
+				  <path d="M124 187 q4 4 8 0" fill="none" stroke="#7a5418" stroke-width="2" stroke-linecap="round"/>
+			  </g>
+		  </svg>
+		  <p width="100%" align="center" id="_realtimelog" class="clash-hero-title">mihomo</p>
+		  <p width="100%" align="center" class="clash-hero-subtitle"><%:Rule-based Custom Proxy Client%></p>
+		  <p width="100%" align="center" id="_downloadnew"></p>
 	  </div>
+	  
 </fieldset>
 
 <fieldset class="cbi-section">
@@ -205,15 +323,15 @@
 		<tr><td width="50%"><span><%:Clash Client%></span></td><td id="_clash"><em><%:Collecting data...%></em></td> </tr>
 		<tr><td width="50%"><span><%:Clash Mode%></span></td><td id="_emode"><em><%:Collecting data...%></em></td> </tr>
 		<tr><td width="50%"><span><%:Clash Config%></span></td><td id="_conf"><em><%:Collecting data...%></em></td> </tr>
-		<tr><td width="50%"><span><%:Config Type%></span></td><td id="_conf_path"><em><%:Collecting data...%></em></td> </tr>
-		<tr><td width="50%"><span><%:Dashboard Panel%></span></td><td id="_panel"><em> <%:Collecting data...%> </em></td> </tr>
+		<tr><td width="50%"><span>代理模式</span></td><td id="_conf_path"><em><%:Collecting data...%></em></td> </tr>
+		<tr><td width="50%"><span>面板类型</span></td><td id="_panel"><em> <%:Collecting data...%> </em></td> </tr>
 		
 	</table>
 </fieldset>
 
 <fieldset class="cbi-section">
 	<table width="100%" cellspacing="10">
-		<tr><td width="50%"> <%:Dashboard Host%></td><td  id="_ip"><em><%:Collecting data...%></em></td></tr>
+		<tr><td width="50%">面板地址</td><td  id="_ip"><em><%:Collecting data...%></em></td></tr>
 	</table>
 </fieldset>
 
@@ -323,79 +441,210 @@
 	var logo = document.getElementById('_logo');
 	var conf = document.getElementById('_conf');
 	var conf_path = document.getElementById('_conf_path');
+	var apiUrls = {
+		status: '<%=url([[admin]], [[services]], [[clash]], [[status]])%>',
+		start: '<%=url([[admin]], [[services]], [[clash]], [[start]])%>',
+		stop: '<%=url([[admin]], [[services]], [[clash]], [[stop]])%>',
+		reload: '<%=url([[admin]], [[services]], [[clash]], [[reload]])%>',
+		set_mode: '<%=url([[admin]], [[services]], [[clash]], [[set_mode]])%>',
+		set_config: '<%=url([[admin]], [[services]], [[clash]], [[set_config]])%>',
+		set_proxy_mode: '<%=url([[admin]], [[services]], [[clash]], [[set_proxy_mode]])%>',
+		set_panel: '<%=url([[admin]], [[services]], [[clash]], [[set_panel]])%>',
+		download_panel: '<%=url([[admin]], [[services]], [[clash]], [[download_panel]])%>',
+		list_configs: '<%=url([[admin]], [[services]], [[clash]], [[list_configs]])%>'
+	};
+
+	var uiLockUntil = 0;
 
 	
-	function callAction(path) {
-		return XHR.get('<%=luci.dispatcher.build_url("admin", "services", "clash")%>/' + path, null, function() {});
+	function apiGet(url, params, cb) {
+		params = params || {};
+		params._ = Date.now();
+		return XHR.get(url, params, function(x, data) {
+			if (typeof cb === 'function')
+				cb(x, data);
+		});
 	}
 
-	function setMode(mode) {
-		return XHR.get('<%=luci.dispatcher.build_url("admin", "services", "clash", "set_mode")%>?mode=' + encodeURIComponent(mode), null, function() {});
+	function callAction(name, cb) {
+		if (!apiUrls[name])
+			return;
+		return apiGet(apiUrls[name], null, cb);
 	}
 
-	function setConfig(name) {
-		return XHR.get('<%=luci.dispatcher.build_url("admin", "services", "clash", "set_config")%>?name=' + encodeURIComponent(name), null, function() {});
+	function setMode(mode, cb) {
+		return apiGet(apiUrls.set_mode, { mode: mode }, cb);
 	}
 
-	function setPanel(name) {
-		return XHR.get('<%=luci.dispatcher.build_url("admin", "services", "clash", "set_panel")%>?name=' + encodeURIComponent(name), null, function() {});
+	function setConfig(name, cb) {
+		return apiGet(apiUrls.set_config, { name: name }, cb);
 	}
 
-	window.clashStart = function() { callAction('start'); };
-	window.clashStop = function() { callAction('stop'); };
-	window.clashSetMode = function(el) { setMode(el.value); };
-	window.clashSetConfig = function(el) { setConfig(el.value); };
-	window.clashSetPanel = function(el) { setPanel(el.value); };
+	function setProxyMode(mode, cb) {
+		return apiGet(apiUrls.set_proxy_mode, { mode: mode }, cb);
+	}
 
-	XHR.poll(1, '<%=luci.dispatcher.build_url("admin", "services", "clash", "status")%>', null, function(x, status) {
+	function setPanel(name, cb) {
+		return apiGet(apiUrls.set_panel, { name: name }, cb);
+	}
+
+	function downloadPanel(name, cb) {
+		return apiGet(apiUrls.download_panel, { name: name }, cb);
+	}
+
+	function lockUi(ms) {
+		var ttl = Date.now() + (ms || 1200);
+		if (ttl > uiLockUntil)
+			uiLockUntil = ttl;
+	}
+
+	function shouldSkipRender(container) {
+		if (Date.now() < uiLockUntil)
+			return true;
+		var active = document.activeElement;
+		return !!(active && container && container.contains(active));
+	}
+
+	function lockAfterRequest() {
+		lockUi(1400);
+	}
+
+	window.clashStart = function() { lockUi(2000); callAction('start', lockAfterRequest); };
+	window.clashStop = function() { lockUi(2000); callAction('stop', lockAfterRequest); };
+	window.clashSetMode = function(el) { lockUi(1800); setMode(el.value, lockAfterRequest); };
+	window.clashSetConfig = function(el) { lockUi(1800); setConfig(el.value, lockAfterRequest); };
+	window.clashSetProxyMode = function(el) { lockUi(1800); setProxyMode(el.value, lockAfterRequest); };
+	window.clashSetPanel = function(el) { lockUi(1800); setPanel(el.value, lockAfterRequest); };
+	window.clashUpdatePanel = function() {
+		var el = document.getElementById('_panel_select');
+		var name = el ? el.value : 'metacubexd';
+		lockUi(3600);
+		setPanel(name, function() {
+			downloadPanel(name, lockAfterRequest);
+		});
+	};
+
+	window._clashPanelLinks = {};
+	window.clashOpenPanel = function() {
+		var el = document.getElementById('_panel_select');
+		var name = el ? el.value : 'metacubexd';
+		var link = (window._clashPanelLinks && window._clashPanelLinks[name]) || '';
+		if (!link) {
+			alert('当前面板未安装，请先点击“更新面板”。');
+			return;
+		}
+		window.open(link, '_blank');
+	};
+
+	function parsePanelState(raw) {
+		raw = (raw || '').toString();
+		if (!raw)
+			return { state: '', panel: '', msg: '' };
+		var parts = raw.split(':');
+		return {
+			state: parts[0] || '',
+			panel: parts[1] || '',
+			msg: parts.slice(2).join(':') || ''
+		};
+	}
+
+	XHR.poll(1, apiUrls.status, null, function(x, status) {
 		if ( x && x.status == 200 ) {
+			var modeValue = (status.mode_value || 'fake-ip').toString().trim();
+			var proxyMode = (status.proxy_mode || 'rule').toString().trim();
+			var typeConf = (status.typeconf || '1').toString().trim();
+			var selectedPanel = (status.dashboard_panel || 'metacubexd').toString().trim();
+			var dashPort = (status.dash_port || '9090').toString().trim();
+			var dashPass = (status.dash_pass || '').toString().trim();
+			var uhttpPort = (status.uhttp_port || '').toString().trim();
 			var cleanLocalIp = (status.localip || '').toString().trim().replace(/\/[0-9]+$/, '');
+			var dashboardInstalled = !!status.dashboard_installed;
+			var yacdInstalled = !!status.yacd_installed;
+			var zashboardInstalled = !!status.zashboard_installed;
+			var razordInstalled = !!status.razord_installed;
+			var panelState = parsePanelState(status.panel_download_state);
+			var panelHost = window.location.hostname || cleanLocalIp;
 			var panelLinks = {
-				metacubexd: 'http://' + window.location.hostname + ':' + status.dash_port + '/ui',
-				yacd: 'http://' + window.location.hostname + status.uhttp_port + '/luci-static/yacd?hostname=' + cleanLocalIp + '&port=' + status.dash_port + '&secret=' + status.dash_pass,
-				zashboard: '',
-				razord: ''
+				metacubexd: dashboardInstalled ? ('http://' + panelHost + ':' + dashPort + '/ui') : '',
+				yacd: yacdInstalled ? ('http://' + panelHost + uhttpPort + '/luci-static/yacd?hostname=' + cleanLocalIp + '&port=' + dashPort + '&secret=' + dashPass) : '',
+				zashboard: (dashboardInstalled && zashboardInstalled) ? ('http://' + panelHost + ':' + dashPort + '/ui') : '',
+				razord: (dashboardInstalled && razordInstalled) ? ('http://' + panelHost + ':' + dashPort + '/ui') : ''
 			};
-			var selectedPanel = status.dashboard_panel || 'metacubexd';
-			panel.innerHTML = '<div class="clash-center-box clash-panel-box">'
-				+ '<select class="cbi-input-select" onchange="clashSetPanel(this)">'
-				+ '<option value="metacubexd"' + (selectedPanel == 'metacubexd' ? ' selected' : '') + '>metacubexd</option>'
-				+ '<option value="yacd"' + (selectedPanel == 'yacd' ? ' selected' : '') + '>yacd</option>'
-				+ '<option value="zashboard"' + (selectedPanel == 'zashboard' ? ' selected' : '') + '>zashboard</option>'
-				+ '<option value="razord"' + (selectedPanel == 'razord' ? ' selected' : '') + '>Razord</option>'
-				+ '</select>'
-				+ (!status.clash ? '<span class="btn clash-panel-tag" style="background:#b91c1c;color:#fff;padding:5px 10px;"><%:NOT RUNNING%></span>' : (panelLinks[selectedPanel] ? '<a type="button" class="btn clash-panel-tag" style="background-color:black;padding:5px 10px;" href="' + panelLinks[selectedPanel] + '" target="_blank"><b><font color="green"><%:DASHBOARD%></font></b></a>' : '<span class="btn clash-panel-tag clash-panel-note" style="background:#b58900;color:#fff;padding:5px 10px;"><%:NOT INSTALLED%></span>'))
-				+ '</div>';
-			clash.innerHTML = status.clash
-				? '<div class="clash-center-box"><span class="btn" style="background:#1f8b4c;color:#fff;padding:5px 10px;"><%:RUNNING%></span><button class="btn cbi-button" onclick="clashStop()"><%:Stop%></button></div>'
-				: '<div class="clash-center-box"><span class="btn" style="background:#b58900;color:#fff;padding:5px 10px;"><%:STOPPED%></span><button class="btn cbi-button cbi-button-apply" onclick="clashStart()"><%:Start%></button></div>';
-			ip.innerHTML = cleanLocalIp
-				? '<div class="clash-center-box"><span class="clash-center-text"><b><font color="green">' + cleanLocalIp + '</font></b></span></div>'
-				: '<div class="clash-center-box"><span class="clash-center-text"><em><b><font color="red"><%:NOT SET%></font></b></em></span></div>';
-			emode.innerHTML = '<div class="clash-center-box"><select class="cbi-input-select" onchange="clashSetMode(this)">' +
-				'<option value="fake-ip"' + ((status.mode_value || 'fake-ip') == 'fake-ip' ? ' selected' : '') + '>fake ip模式</option>' +
-				'<option value="tun"' + ((status.mode_value || 'fake-ip') == 'tun' ? ' selected' : '') + '>Tun模式</option>' +
-				'</select></div>';
-			XHR.get('<%=luci.dispatcher.build_url("admin", "services", "clash", "list_configs")%>', null, function(x2, confs) {
-				if (x2 && x2.status == 200 && confs && confs.configs) {
-					var opts = confs.configs.map(function(item) {
-						return '<option value="' + item + '"' + (item == confs.current ? ' selected' : '') + '>' + item + '</option>';
-					}).join('');
-					conf.innerHTML = '<div class="clash-center-box"><select class="cbi-input-select" onchange="clashSetConfig(this)">' + opts + '</select></div>';
-				}
-			});
-			if(status.typeconf==1){
-				conf_path.innerHTML = status.clash ? '<div class="clash-center-box"><span class="clash-center-text"><b><font color="green"><%:SUBSCRIBE%></font></b></span></div>' : '<div class="clash-center-box"><span class="clash-center-text"><b><font color="red"><%:NOT RUNNING%></font></b></span></div>';
+			window._clashPanelLinks = panelLinks;
+			var panelInstalledMap = {
+				metacubexd: dashboardInstalled,
+				yacd: yacdInstalled,
+				zashboard: zashboardInstalled,
+				razord: razordInstalled
+			};
+			var panelInstalled = !!panelInstalledMap[selectedPanel];
+			var panelBusy = panelState.state === 'downloading' && (!panelState.panel || panelState.panel === selectedPanel);
+			window._clashIsRunning = !!status.clash;
+
+			if (!shouldSkipRender(panel)) {
+				panel.innerHTML = '<div class="clash-center-box">'
+					+ '<select class="cbi-input-select" id="_panel_select" onchange="clashSetPanel(this)">'
+					+ '<option value="metacubexd"' + (selectedPanel == 'metacubexd' ? ' selected' : '') + '><%:MetaCubeXD Panel%></option>'
+					+ '<option value="yacd"' + (selectedPanel == 'yacd' ? ' selected' : '') + '><%:Yacd Panel%></option>'
+					+ '<option value="zashboard"' + (selectedPanel == 'zashboard' ? ' selected' : '') + '><%:Zashboard Panel%></option>'
+					+ '<option value="razord"' + (selectedPanel == 'razord' ? ' selected' : '') + '><%:Razord Panel%></option>'
+					+ '</select>'
+					+ '</div>';
 			}
-			if(status.typeconf==2){
-				conf_path.innerHTML = status.clash ? '<div class="clash-center-box"><span class="clash-center-text"><b><font color="green"><%:UPLOAD%></font></b></span></div>' : '<div class="clash-center-box"><span class="clash-center-text"><b><font color="red"><%:NOT RUNNING%></font></b></span></div>';
+
+			if (!shouldSkipRender(clash)) {
+				clash.innerHTML = status.clash
+					? '<div class="clash-center-box"><span class="btn" style="background:#1f8b4c;color:#fff;padding:5px 10px;"><%:RUNNING%></span><button class="btn cbi-button" onclick="clashStop()"><%:Stop%></button></div>'
+					: '<div class="clash-center-box"><span class="btn" style="background:#b58900;color:#fff;padding:5px 10px;"><%:STOPPED%></span><button class="btn cbi-button cbi-button-apply" onclick="clashStart()"><%:Start%></button></div>';
 			}
-			if(status.typeconf==3){
-				conf_path.innerHTML = status.clash ? '<div class="clash-center-box"><span class="clash-center-text"><b><font color="green"><%:CUSTOM%></font></b></span></div>' : '<div class="clash-center-box"><span class="clash-center-text"><b><font color="red"><%:NOT RUNNING%></font></b></span></div>';
-			}	
-			if(status.typeconf==0 || status.typeconf==''){
-				conf_path.innerHTML = status.typeconf ? '<div class="clash-center-box"><span class="clash-center-text"><b><font color="red"><%:NOT SELECTED%></font></b></span></div>' : '<div class="clash-center-box"><span class="clash-center-text"><b><font color="red"><%:NOT RUNNING%></font></b></span></div>';
-			}	
+
+			if (!shouldSkipRender(ip)) {
+				var updateBtn = '<button type="button" class="btn cbi-button" style="background:#0d8f5b;color:#fff;padding:5px 12px;"'
+					+ (panelBusy ? ' disabled' : '')
+					+ ' onclick="clashUpdatePanel()">'
+					+ (panelBusy ? '更新中...' : '更新面板')
+					+ '</button>';
+				var openBtn = '<button type="button" class="btn cbi-button" style="background:#6b7280;color:#fff;padding:5px 12px;"'
+					+ ((panelBusy || !panelInstalled) ? ' disabled' : '')
+					+ ' onclick="clashOpenPanel()">打开面板</button>';
+				ip.innerHTML = '<div class="clash-center-box"><div class="clash-panel-actions">' + updateBtn + openBtn + '</div></div>';
+			}
+
+			if (!shouldSkipRender(emode)) {
+				emode.innerHTML = '<div class="clash-center-box"><select class="cbi-input-select" onchange="clashSetMode(this)">' +
+					'<option value="fake-ip"' + (modeValue == 'fake-ip' ? ' selected' : '') + '><%:fake ip%></option>' +
+					'<option value="tun"' + (modeValue == 'tun' ? ' selected' : '') + '><%:Tun Mode%></option>' +
+					'</select></div>';
+			}
+
+			if (!shouldSkipRender(conf_path)) {
+				conf_path.innerHTML = '<div class="clash-center-box"><select class="cbi-input-select" onchange="clashSetProxyMode(this)">'
+					+ '<option value="rule"' + (proxyMode == 'rule' ? ' selected' : '') + '>规则模式</option>'
+					+ '<option value="global"' + (proxyMode == 'global' ? ' selected' : '') + '>全局模式</option>'
+					+ '<option value="direct"' + (proxyMode == 'direct' ? ' selected' : '') + '>直连模式</option>'
+					+ '</select></div>';
+			}
+
+			if (rtlog && normalizeRuntimeLabel(rtlog.textContent || '') === 'mihomo') {
+				rtlog.classList.toggle('clash-hero-title-running', !!window._clashIsRunning);
+			}
+
+			if (!shouldSkipRender(conf)) {
+				apiGet(apiUrls.list_configs, { type: typeConf }, function(x2, confs) {
+					if (shouldSkipRender(conf))
+						return;
+					if (x2 && x2.status == 200 && confs && confs.configs) {
+						if (confs.configs.length > 0) {
+							var opts = confs.configs.map(function(item) {
+								return '<option value="' + item + '"' + (item == confs.current ? ' selected' : '') + '>' + item + '</option>';
+							}).join('');
+							conf.innerHTML = '<div class="clash-center-box"><select class="cbi-input-select" onchange="clashSetConfig(this)">' + opts + '</select></div>';
+						} else {
+							conf.innerHTML = '<div class="clash-center-box"><span class="clash-center-text"><b><font color="red"><%:NOT SELECTED%></font></b></span></div>';
+						}
+					}
+				});
+			}
 			if(status.new_version > status.current_version)
 			{
 				dnew.innerHTML ='<center><br><a href="https://github.com/frainzy1477/luci-app-clash/releases/download/'+status.new_version+'/luci-app-clash_'+status.new_version+'_all.ipk" class="btn" style="height:20px;font-size:15px;margin-top:-20px;background-color:#568fa1;color:#ffffff;" target="_blank"><%:Download Update%></a></center>';
@@ -418,11 +667,22 @@
 
 
 	var rtlog = document.getElementById('_realtimelog');
-	XHR.poll(1, '<%=luci.dispatcher.build_url("admin", "services", "clash", "readlog")%>', status.readlog, function(x, status) {
+	function normalizeRuntimeLabel(text) {
+		var t = (text || '').toString().trim();
+		if (!t)
+			return 'mihomo';
+		t = t.replace(/Clash\s+for\s+OpenWRT/gi, 'mihomo');
+		t = t.replace(/\bclash\b/gi, 'mihomo');
+		t = t.replace(/\biptables\b/gi, '网络规则');
+		t = t.replace(/\bip6tables\b/gi, '网络规则');
+		t = t.replace(/TPROXY/gi, 'UDP 转发');
+		return t;
+	}
+	XHR.poll(1, '<%=luci.dispatcher.build_url("admin", "services", "clash", "readlog")%>', null, function(x, status) {
 	  if ( x && x.status == 200 ) {
-		 if ( status.readlog != "\n" || status.readlog != "" ) {
-			rtlog.innerHTML = '<b>'+status.readlog+'</b>';
-		}
+		var text = normalizeRuntimeLabel(status.readlog);
+		rtlog.textContent = text;
+		rtlog.classList.toggle('clash-hero-title-running', !!window._clashIsRunning && text === 'mihomo');
 	  }
 	});
 	

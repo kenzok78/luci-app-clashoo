@@ -2,4 +2,4 @@
 
 . /usr/share/clash/version_lib.sh
 
-write_release_tag "MetaCubeX/mihomo" "/usr/share/clash/new_mihomo_core_version"
+write_alpha_identifier "MetaCubeX/mihomo" "/usr/share/clash/new_mihomo_core_version"

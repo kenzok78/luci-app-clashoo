@@ -85,6 +85,7 @@ if [ -z "$${IPKG_INSTROOT}" ]; then
 	mv /usr/share/clashbackup/config.bak3 /usr/share/clash/config/custom/config.yaml 2>/dev/null
 	mv /usr/share/clashbackup/rule.bak /usr/share/clash/rule.yaml 2>/dev/null
 	/etc/init.d/clash disable 2>/dev/null
+	/etc/init.d/uhttpd restart >/dev/null 2>&1 || true
 fi
 /etc/init.d/clash disable 2>/dev/null
 
@@ -97,7 +98,6 @@ define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/model/cbi/clash/config
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/model/cbi/clash/dns
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/model/cbi/clash/client
-	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/model/cbi/clash/game
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/model/cbi/clash/geoip
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/model/cbi/clash/logs
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/model/cbi/clash/update
@@ -111,14 +111,10 @@ define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/usr/share/clash
 	$(INSTALL_DIR) $(1)/usr/share/rpcd	
 	$(INSTALL_DIR) $(1)/usr/share/rpcd/acl.d	
-	$(INSTALL_DIR) $(1)/usr/share/clash/rules
-	$(INSTALL_DIR) $(1)/usr/share/clash/rules/g_rules
 	$(INSTALL_DIR) $(1)/etc/clash/dashboard
 	$(INSTALL_DIR) $(1)/etc/clash/dashboard/img
 	$(INSTALL_DIR) $(1)/etc/clash/dashboard/js
 	$(INSTALL_DIR) $(1)/usr/share/clash/yacd
-	$(INSTALL_DIR) $(1)/etc/clash/clashtun
-	$(INSTALL_DIR) $(1)/etc/clash/dtun
 	$(INSTALL_DIR) $(1)/usr/share/clashbackup
 	$(INSTALL_DIR) $(1)/usr/share/clash/create
 	$(INSTALL_DIR) $(1)/etc/clash/provider
@@ -136,8 +132,6 @@ define Package/$(PKG_NAME)/install
 	$(INSTALL_BIN) ./root/usr/share/clash/create/* $(1)/usr/share/clash/create
 	$(INSTALL_BIN) ./root/usr/share/clash/*.sh $(1)/usr/share/clash
 	$(INSTALL_BIN) ./root/usr/share/rpcd/acl.d/luci-app-clash.json $(1)/usr/share/rpcd/acl.d
-	$(INSTALL_BIN) ./root/usr/share/clash/rules/g_rules/Steam.rules $(1)/usr/share/clash/rules/g_rules
-	$(INSTALL_BIN) ./root//usr/share/clash/rules/rules.list $(1)/usr/share/clash/rules
 	
 	$(INSTALL_BIN) ./root/usr/share/clash/luci_version $(1)/usr/share/clash
 	$(INSTALL_BIN) ./root/usr/share/clash/rule.yaml $(1)/usr/share/clash
@@ -161,7 +155,6 @@ define Package/$(PKG_NAME)/install
 	$(INSTALL_DATA) ./luasrc/model/cbi/clash/config/*.lua $(1)/usr/lib/lua/luci/model/cbi/clash/config
 	$(INSTALL_DATA) ./luasrc/model/cbi/clash/client/*.lua $(1)/usr/lib/lua/luci/model/cbi/clash/client
 	$(INSTALL_DATA) ./luasrc/model/cbi/clash/dns/*.lua $(1)/usr/lib/lua/luci/model/cbi/clash/dns
-	$(INSTALL_DATA) ./luasrc/model/cbi/clash/game/*.lua $(1)/usr/lib/lua/luci/model/cbi/clash/game
 	$(INSTALL_DATA) ./luasrc/model/cbi/clash/geoip/*.lua $(1)/usr/lib/lua/luci/model/cbi/clash/geoip
 	$(INSTALL_DATA) ./luasrc/model/cbi/clash/logs/*.lua $(1)/usr/lib/lua/luci/model/cbi/clash/logs
 	$(INSTALL_DATA) ./luasrc/model/cbi/clash/update/*.lua $(1)/usr/lib/lua/luci/model/cbi/clash/update
@@ -191,6 +184,15 @@ endef
 define Package/luci-i18n-clash-zh-cn/install
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/i18n
 	$(INSTALL_DATA) ./po/zh-cn/clash.zh-cn.lmo $(1)/usr/lib/lua/luci/i18n
+endef
+
+define Package/luci-i18n-clash-zh-cn/postinst
+#!/bin/sh
+if [ -z "$${IPKG_INSTROOT}" ]; then
+	rm -rf /tmp/luci*
+	/etc/init.d/uhttpd restart >/dev/null 2>&1 || true
+fi
+exit 0
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))

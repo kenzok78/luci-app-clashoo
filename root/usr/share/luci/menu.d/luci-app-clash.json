@@ -10,7 +10,7 @@
         }
     },
     "admin/services/clash/app": {
-        "title": "Overview",
+        "title": "概览",
         "order": 10,
         "action": {
             "type": "view",
@@ -18,7 +18,7 @@
         }
     },
     "admin/services/clash/log": {
-        "title": "Log",
+        "title": "日志",
         "order": 20,
         "action": {
             "type": "view",

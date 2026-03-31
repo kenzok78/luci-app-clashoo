@@ -8,8 +8,7 @@ const BINARY_PATHS = [
 	'/usr/bin/mihomo',
 	'/usr/bin/clash-meta',
 	'/usr/bin/clash',
-	'/etc/clash/clash',
-	'/etc/clash/clashtun/clash'
+	'/etc/clash/clash'
 ];
 
 const LOG_PATHS = [
@@ -59,15 +58,15 @@ function detect_firewall_backend() {
 	return '';
 }
 
-function detect_missing_legacy_tools() {
+function detect_missing_fw4_tools() {
 	let missing = [];
 
-	if (system('command -v iptables >/dev/null 2>&1') != 0) {
-		push(missing, 'iptables');
+	if (system('command -v fw4 >/dev/null 2>&1') != 0) {
+		push(missing, 'fw4');
 	}
 
-	if (system('command -v ipset >/dev/null 2>&1') != 0) {
-		push(missing, 'ipset');
+	if (system('command -v nft >/dev/null 2>&1') != 0) {
+		push(missing, 'nft');
 	}
 
 	if (system('command -v ip >/dev/null 2>&1') != 0) {
@@ -190,7 +189,7 @@ const methods = {
 		call: function() {
 			return {
 				backend: detect_firewall_backend(),
-				missing_legacy_tools: detect_missing_legacy_tools(),
+				missing_fw4_tools: detect_missing_fw4_tools(),
 				has_mihomo: access('/usr/bin/mihomo', 'x'),
 				has_clash_meta: access('/usr/bin/clash-meta', 'x'),
 				has_builtin_core: access('/etc/clash/clash', 'x')

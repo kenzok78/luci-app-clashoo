@@ -32,7 +32,7 @@
 - 订阅导入精简：`Import Config` 仅保留 `clash` 与 `clash meta` 两种模式，移除 `ssr2clash/v2clash` 旧入口
 - 核心类型统一：`Client` 与 `Update` 页面统一支持 `clash` / `clash meta` / `mihomo`，`Download Online -> Select Core` 默认 `x86_64`
 - 启停与日志健壮性修复：补全 `ping_enable()`，修复 `check/check_geoip` 在日志文件不存在时 500 的问题
-- 菜单与跳转兼容修复：移除 Settings 下 `Game Rules` 菜单项，遗留 `grules` 跳转改为 `settings/other` 防止 404
+- Game Rules 模块下线：移除相关页面、后端接口、启动注入脚本与打包资源，避免遗留 404 与配置污染
 - 移动端 UI 整理：统一 Client/Create 页面按钮宽高与配色，减少红色高亮（仅保留告警语义）
 
 ---
@@ -47,7 +47,7 @@
 支持的内核二进制（按优先级自动检测）：
 
 ```
-/usr/bin/mihomo  →  /usr/bin/clash-meta  →  /etc/clash/clashtun/clash  →  /etc/clash/dtun/clash  →  /etc/clash/clash
+/usr/bin/mihomo  →  /usr/bin/clash-meta  →  /etc/clash/clash
 ```
 
 ---

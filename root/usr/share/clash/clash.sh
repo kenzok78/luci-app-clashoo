@@ -1,20 +1,93 @@
-#!/bin/bash /etc/rc.common
-   
-clash_url=$(uci get clash.config.clash_url 2>/dev/null)
-ssr_url=$(uci get clash.config.ssr_url 2>/dev/null)
-v2_url=$(uci get clash.config.v2_url 2>/dev/null)
+#!/bin/sh
 
-config_name=$(uci get clash.config.config_name 2>/dev/null) 
-subtype=$(uci get clash.config.subcri 2>/dev/null) 
-REAL_LOG="/usr/share/clash/clash_real.txt" 
-lang=$(uci get luci.main.lang 2>/dev/null)
-CONFIG_YAML="/usr/share/clash/config/sub/${config_name}.yaml" 
+REAL_LOG="/usr/share/clash/clash_real.txt"
+LIST_FILE="/usr/share/clashbackup/confit_list.conf"
+SUB_DIR="/usr/share/clash/config/sub"
+TMP_PREFIX="/tmp/clash_sub_$$"
+
+subtype="$(uci -q get clash.config.subcri 2>/dev/null)"
+config_name_raw="$(uci -q get clash.config.config_name 2>/dev/null)"
+lang="$(uci -q get luci.main.lang 2>/dev/null)"
+
+log_text() {
+	if [ "$lang" = "zh_cn" ]; then
+		echo "$2" >"$REAL_LOG"
+	else
+		echo "$1" >"$REAL_LOG"
+	fi
+}
+
+sanitize_name() {
+	local name
+	name="$1"
+	name="$(printf '%s' "$name" | tr 'A-Z' 'a-z')"
+	name="$(printf '%s' "$name" | sed -e 's/\.yaml$//' -e 's/\.yml$//')"
+	name="$(printf '%s' "$name" | tr ' /' '--')"
+	name="$(printf '%s' "$name" | sed -e 's/[^a-z0-9._-]/-/g' -e 's/--\+/-/g' -e 's/^[._-]*//' -e 's/[._-]*$//')"
+	printf '%s' "$name"
+}
+
+url_to_name() {
+	local url host qname
+	url="$1"
+
+	qname="$(printf '%s' "$url" | sed -n 's/.*[?&]filename=\([^&#]*\).*/\1/p')"
+	[ -n "$qname" ] || qname="$(printf '%s' "$url" | sed -n 's/.*[?&]name=\([^&#]*\).*/\1/p')"
+	qname="$(sanitize_name "$qname")"
+	if [ -n "$qname" ]; then
+		printf '%s' "$qname"
+		return
+	fi
+
+	host="$(printf '%s' "$url" | sed -e 's#^[a-zA-Z0-9+.-]*://##' -e 's#/.*$##' -e 's/:.*$//')"
+	host="$(sanitize_name "$host")"
+	[ -n "$host" ] || host="sub"
+	printf '%s' "$host"
+}
+
+next_available_name() {
+	local base try idx
+	base="$(sanitize_name "$1")"
+	[ -n "$base" ] || base="sub"
+
+	if [ ! -f "$SUB_DIR/${base}.yaml" ]; then
+		printf '%s' "$base"
+		return
+	fi
+
+	idx=2
+	while :; do
+		try="${base}-${idx}"
+		if [ ! -f "$SUB_DIR/${try}.yaml" ]; then
+			printf '%s' "$try"
+			return
+		fi
+		idx=$((idx + 1))
+	done
+}
+
+get_subscription_urls() {
+	uci -q show clash.config 2>/dev/null | awk -F"'" '
+		/^clash.config.clash_url=/ {
+			if (NF >= 3) {
+				for (i = 2; i <= NF; i += 2) {
+					if (length($i) > 0) print $i
+				}
+			} else {
+				sub(/^clash.config.clash_url=/, "", $0)
+				if (length($0) > 0) print $0
+			}
+		}
+	'
+}
 
 ensure_system_dns() {
-	local test_host="github.com"
+	local test_host
+	test_host="github.com"
 	if nslookup "$test_host" 127.0.0.1 >/dev/null 2>&1 || nslookup "$test_host" >/dev/null 2>&1; then
 		return 0
 	fi
+
 	uci delete dhcp.@dnsmasq[0].server >/dev/null 2>&1
 	uci set dhcp.@dnsmasq[0].noresolv='0' >/dev/null 2>&1
 	uci del_list dhcp.@dnsmasq[0].server='127.0.0.1#' >/dev/null 2>&1
@@ -25,107 +98,122 @@ ensure_system_dns() {
 	/etc/init.d/dnsmasq restart >/dev/null 2>&1
 	sleep 2
 }
- 
-if  [ $config_name == "" ] || [ -z $config_name ];then
 
-	if [ $lang == "en" ] || [ $lang == "auto" ];then
-				echo "Tag Your Config" >$REAL_LOG
-	elif [ $lang == "zh_cn" ];then
-				echo "标记您的配置" >$REAL_LOG
+download_subscription() {
+	local url target tmp
+	url="$1"
+	target="$2"
+	tmp="${TMP_PREFIX}.yaml"
+
+	rm -f "$tmp" >/dev/null 2>&1
+	wget -q -c4 --no-check-certificate --user-agent="Clash/OpenWRT" "$url" -O "$tmp"
+	if [ "$?" -ne 0 ]; then
+		rm -f "$tmp" >/dev/null 2>&1
+		return 1
 	fi
-	sleep 5
-	echo "Clash for OpenWRT" >$REAL_LOG
-	exit 0	 
-	
-fi
 
+	if ! grep -Eq '^(proxies|proxy-providers):' "$tmp" 2>/dev/null; then
+		rm -f "$tmp" >/dev/null 2>&1
+		return 1
+	fi
 
-if [ ! -f "/usr/share/clashbackup/confit_list.conf" ];then 
-   touch /usr/share/clashbackup/confit_list.conf
-fi
+	mv "$tmp" "$target" >/dev/null 2>&1 || {
+		rm -f "$tmp" >/dev/null 2>&1
+		return 1
+	}
 
+	return 0
+}
 
-check_name=$(grep -F "${config_name}.yaml" "/usr/share/clashbackup/confit_list.conf")
+upsert_meta() {
+	local filename url typ tmpf
+	filename="$1"
+	url="$2"
+	typ="$3"
+	tmpf="${TMP_PREFIX}.list"
 
-if [ -n "$check_name" ]; then
-	sed -i "\#^${config_name}\\.yaml#d" /usr/share/clashbackup/confit_list.conf 2>/dev/null
-	rm -f "$CONFIG_YAML" 2>/dev/null
+	[ -f "$LIST_FILE" ] || touch "$LIST_FILE"
+	awk -F '#' -v n="$filename" '$1 != n { print $0 }' "$LIST_FILE" >"$tmpf"
+	printf '%s#%s#%s\n' "$filename" "$url" "$typ" >>"$tmpf"
+	mv "$tmpf" "$LIST_FILE"
+}
+
+cleanup_tmp() {
+	rm -f "${TMP_PREFIX}.yaml" "${TMP_PREFIX}.urls" "${TMP_PREFIX}.list" >/dev/null 2>&1
+}
+
+trap cleanup_tmp EXIT INT TERM
+
+[ "$subtype" = "clash" ] || [ "$subtype" = "meta" ] || subtype="clash"
+
+mkdir -p "$SUB_DIR" /usr/share/clashbackup >/dev/null 2>&1
+[ -f "$LIST_FILE" ] || touch "$LIST_FILE"
+
+URLS_FILE="${TMP_PREFIX}.urls"
+get_subscription_urls | sed '/^[[:space:]]*$/d' | awk '!seen[$0]++' >"$URLS_FILE"
+
+url_count="$(wc -l <"$URLS_FILE" 2>/dev/null | tr -d ' ')"
+if [ -z "$url_count" ] || [ "$url_count" -eq 0 ]; then
+	log_text "No subscription URL found" "未找到订阅链接"
+	sleep 2
+	log_text "Clash for OpenWRT" "Clash for OpenWRT"
+	exit 1
 fi
 
 ensure_system_dns
+log_text "Downloading subscription..." "开始下载订阅..."
 
-if [ $lang == "en" ] || [ $lang == "auto" ];then
-			echo "Downloading Configuration..." >$REAL_LOG
-	elif [ $lang == "zh_cn" ];then
-			echo "开始下载配置" >$REAL_LOG
-	fi
-	sleep 1
+base_name="$(sanitize_name "$config_name_raw")"
+timestamp="$(date +%Y%m%d%H%M%S)"
 
-	if [ "$subtype" = "clash" ] || [ "$subtype" = "meta" ];then
-	wget -q -c4 --no-check-certificate --user-agent="Clash/OpenWRT" "$clash_url" -O "$CONFIG_YAML"
-	if [ "$?" -eq "0" ]; then
-	echo "${config_name}.yaml#$clash_url#$subtype" >>/usr/share/clashbackup/confit_list.conf
-	fi
-    fi
-	
-	if [ "$subtype" = "ssr2clash" ];then
-	wget -q -c4 --no-check-certificate --user-agent="Clash/OpenWRT" "https://gfwsb.114514.best/sub?target=clashr&url=$ssr_url" -O "$CONFIG_YAML"
-	if [ "$?" -eq "0" ]; then
-	echo "${config_name}.yaml#$ssr_url#$subtype" >>/usr/share/clashbackup/confit_list.conf
-		CONFIG_YAMLL="/tmp/conf"
-		da_password=$(uci get clash.config.dash_pass 2>/dev/null)
-		redir_port=$(uci get clash.config.redir_port 2>/dev/null)
-		http_port=$(uci get clash.config.http_port 2>/dev/null)
-		socks_port=$(uci get clash.config.socks_port 2>/dev/null) 
-		dash_port=$(uci get clash.config.dash_port 2>/dev/null)
-		bind_addr=$(uci get clash.config.bind_addr 2>/dev/null)
-		allow_lan=$(uci get clash.config.allow_lan 2>/dev/null)
-		log_level=$(uci get clash.config.level 2>/dev/null)
-		p_mode=$(uci get clash.config.p_mode 2>/dev/null)
-		sed -i "/^Proxy:/i\#clash-openwrt" $CONFIG_YAML 2>/dev/null
-		sed -i '1,/#clash-openwrt/d' $CONFIG_YAML 2>/dev/null
-		
-		cat /usr/share/clash/dns.yaml $CONFIG_YAML > $CONFIG_YAMLL 2>/dev/null
-		mv $CONFIG_YAMLL $CONFIG_YAML 2>/dev/null
-		
-		sed -i "1i\#****CLASH-CONFIG-START****#" $CONFIG_YAML 2>/dev/null
-		sed -i "2i\port: ${http_port}" $CONFIG_YAML 2>/dev/null
-		sed -i "/port: ${http_port}/a\socks-port: ${socks_port}" $CONFIG_YAML 2>/dev/null 
-		sed -i "/socks-port: ${socks_port}/a\redir-port: ${redir_port}" $CONFIG_YAML 2>/dev/null 
-		sed -i "/redir-port: ${redir_port}/a\allow-lan: ${allow_lan}" $CONFIG_YAML 2>/dev/null 
-		if [ $allow_lan == "true" ];  then
-		sed -i "/allow-lan: ${allow_lan}/a\bind-address: \"${bind_addr}\"" $CONFIG_YAML 2>/dev/null 
-		sed -i "/bind-address: \"${bind_addr}\"/a\mode: ${p_mode}" $CONFIG_YAML 2>/dev/null
-		sed -i "/mode: ${p_mode}/a\log-level: ${log_level}" $CONFIG_YAML 2>/dev/null 
-		sed -i "/log-level: ${log_level}/a\external-controller: 0.0.0.0:${dash_port}" $CONFIG_YAML 2>/dev/null 
-		sed -i "/external-controller: 0.0.0.0:${dash_port}/a\secret: \"${da_password}\"" $CONFIG_YAML 2>/dev/null 
-		sed -i "/secret: \"${da_password}\"/a\external-ui: \"/usr/share/clash/dashboard\"" $CONFIG_YAML 2>/dev/null 
-		
+success=0
+failed=0
+idx=0
+first_file=""
+
+while IFS= read -r url; do
+	[ -n "$url" ] || continue
+	idx=$((idx + 1))
+
+	if [ -n "$base_name" ]; then
+		if [ "$url_count" -gt 1 ]; then
+			name_candidate="$(sanitize_name "${base_name}-${idx}")"
+			file_base="$(next_available_name "$name_candidate")"
 		else
-		sed -i "/allow-lan: ${allow_lan}/a\mode: Rule" $CONFIG_YAML 2>/dev/null
-		sed -i "/mode: Rule/a\log-level: ${log_level}" $CONFIG_YAML 2>/dev/null 
-		sed -i "/log-level: ${log_level}/a\external-controller: 0.0.0.0:${dash_port}" $CONFIG_YAML 2>/dev/null 
-		sed -i "/external-controller: 0.0.0.0:${dash_port}/a\secret: \"${da_password}\"" $CONFIG_YAML 2>/dev/null 
-		sed -i "/secret: \"${da_password}\"/a\external-ui: \"/usr/share/clash/dashboard\"" $CONFIG_YAML 2>/dev/null	
+			file_base="$base_name"
 		fi
-		sleep 1
-		
+	else
+		name_candidate="$(url_to_name "$url")-${timestamp}"
+		if [ "$url_count" -gt 1 ]; then
+			name_candidate="${name_candidate}-${idx}"
+		fi
+		file_base="$(next_available_name "$name_candidate")"
 	fi
-    fi
 
-	if [ "$subtype" = "v2clash" ];then
-	wget -q -c4 --no-check-certificate --user-agent="Clash/OpenWRT" "https://tgbot.lbyczf.com/v2rayn2clash?url=$v2_url" -O "$CONFIG_YAML"
-	if [ "$?" -eq "0" ]; then
-	echo "${config_name}.yaml#$v2_url#$subtype" >>/usr/share/clashbackup/confit_list.conf
+	target_file="$SUB_DIR/${file_base}.yaml"
+	if download_subscription "$url" "$target_file"; then
+		upsert_meta "${file_base}.yaml" "$url" "$subtype"
+		[ -n "$first_file" ] || first_file="$target_file"
+		success=$((success + 1))
+	else
+		failed=$((failed + 1))
 	fi
-    fi	
-	
-	if [ $lang == "en" ] || [ $lang == "auto" ];then
-		echo "Downloading Configuration Completed" >$REAL_LOG
-		sleep 2
-		echo "Clash for OpenWRT" >$REAL_LOG
-	elif [ $lang == "zh_cn" ];then
-		echo "下载配置完成" >$REAL_LOG
-		sleep 2
-		echo "Clash for OpenWRT" >$REAL_LOG
+done <"$URLS_FILE"
+
+if [ "$success" -gt 0 ]; then
+	use_config="$(uci -q get clash.config.use_config 2>/dev/null)"
+	if [ -z "$use_config" ] || [ ! -f "$use_config" ]; then
+		uci set clash.config.use_config="$first_file"
+		uci set clash.config.config_type='1'
+		uci commit clash
 	fi
+	log_text "Subscription download completed: ${success} success, ${failed} failed" "订阅下载完成：成功 ${success} 个，失败 ${failed} 个"
+	ret=0
+else
+	log_text "All subscription downloads failed" "订阅下载失败"
+	ret=1
+fi
+
+sleep 2
+log_text "Clash for OpenWRT" "Clash for OpenWRT"
+exit "$ret"

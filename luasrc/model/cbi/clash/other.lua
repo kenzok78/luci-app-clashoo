@@ -17,11 +17,11 @@ kk.pageaction = false
 o = s:option(Flag, "auto_update", translate("Auto Update"))
 o.description = translate("Auto Update Server subscription")
 
-o = s:option(ListValue, "auto_update_time", translate("Update time (every day)"))
-o:value("1", translate("Every Hour"))
-o:value("6", translate("Every 6 Hours"))
-o:value("12", translate("Every 12 Hours"))
-o:value("24", translate("Every 24 Hours"))
+o = s:option(ListValue, "auto_update_time", "更新时间")
+o:value("1", "每小时")
+o:value("6", "每6小时")
+o:value("12", "每12小时")
+o:value("24", "每24小时")
 o.description = translate("Daily Server subscription update time. Only update config in use")
 
 o = s:option(Button, "Apply")
@@ -43,11 +43,11 @@ o = s:option(Flag, "auto_clear_log", translate("Auto Clear Log"))
 o.description = translate("Auto Clear Log")
 
 
-o = s:option(ListValue, "clear_time", translate("Clear Time (Time of Day)"))
-o:value("1", translate("Every Hour"))
-o:value("6", translate("Every 6 Hours"))
-o:value("12", translate("Every 12 Hours"))
-o:value("24", translate("Every 24 Hours"))
+o = s:option(ListValue, "clear_time", "清除时间")
+o:value("1", "每小时")
+o:value("6", "每6小时")
+o:value("12", "每12小时")
+o:value("24", "每24小时")
 o.description = translate("Clear Log Time")
 
 o=s:option(Button,"clear_clear")
