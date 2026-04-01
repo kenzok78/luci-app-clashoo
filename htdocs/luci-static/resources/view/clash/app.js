@@ -247,6 +247,12 @@ return view.extend({
         o.depends('access_control', '2');
 
 
-        return m.render();
+        return m.render().then(function(node) {
+            let style = E('style', {}, [
+                '.cbi-input-select, .cbi-input-text { width: 100% !important; max-width: 460px !important; box-sizing: border-box !important; }'
+            ]);
+            node.insertBefore(style, node.firstChild);
+            return node;
+        });
     }
 });

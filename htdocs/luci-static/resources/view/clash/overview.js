@@ -28,7 +28,20 @@ return view.extend({
         function mkSelect(id, opts, cur, onChange) {
             let sel = E('select', {
                 id: id,
-                style: 'width:260px;max-width:90vw;padding:.5rem .75rem;border:1px solid #ccc;border-radius:.375rem;font-size:.95rem;background:#fff'
+                style: [
+                    'width:260px',
+                    'max-width:90vw',
+                    'padding:.5rem 2rem .5rem .75rem',
+                    'border:1px solid #d1d5db',
+                    'border-radius:.375rem',
+                    'font-size:.95rem',
+                    'background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E") no-repeat right .75rem center',
+                    'background-size:12px',
+                    '-webkit-appearance:none',
+                    '-moz-appearance:none',
+                    'appearance:none',
+                    'cursor:pointer'
+                ].join(';')
             });
             for (let [v, label] of opts) {
                 let o = E('option', { value: v }, label);
