@@ -174,19 +174,6 @@ return view.extend({
         o.depends('access_control', '2');
 
 
-        return m.render().then(function (node) {
-            /* Constrain all selects so long filenames don't stretch the layout */
-            let style = E('style', {}, [
-                '.cbi-value-field select.cbi-input-select {',
-                '  max-width:100%;',
-                '  width:100%;',
-                '  box-sizing:border-box;',
-                '  overflow:hidden;',
-                '  text-overflow:ellipsis;',
-                '}'
-            ].join(''));
-            node.insertBefore(style, node.firstChild);
-            return node;
-        });
+        return m.render();
     }
 });
