@@ -166,29 +166,37 @@ return view.extend({
         s.render = function () {
             let input = E('input', {
                 type: 'file', accept: '.yaml,.yml',
-                style: 'margin:4px 0', id: 'cfg-upload-input'
+                id: 'cfg-upload-input',
+                style: 'display:block;margin-bottom:8px'
             });
-            let btn = E('button', { class: 'btn cbi-button cbi-button-apply' }, _('上传'));
-            let status = E('span', { style: 'margin-left:8px;color:#666' }, '');
+            let status = E('span', { style: 'margin-left:8px;color:#666;font-size:.9rem' }, '');
+            let btn = E('button', {
+                type: 'button',
+                style: 'display:inline-block;padding:.45rem 1.4rem;background:#4c6ef5;color:#fff;border:none;border-radius:.375rem;cursor:pointer;font-size:.95rem'
+            }, _('上传'));
             btn.addEventListener('click', () => {
                 let files = input.files;
                 if (!files || !files.length) { status.textContent = _('未选择文件'); return; }
                 let file = files[0];
+                status.textContent = _('上传中…');
                 let reader = new FileReader();
                 reader.onload = e => {
                     L.Request.post('/cgi-bin/luci/admin/services/clash/upload', new Blob([e.target.result]), {
                         headers: { 'X-Filename': file.name }
                     }).then(resp => {
                         status.textContent = resp.ok ? _('上传成功') : _('上传失败');
-                        if (resp.ok) setTimeout(() => location.reload(), 1000);
-                    });
+                        if (resp.ok) setTimeout(() => location.reload(), 1500);
+                    }).catch(() => { status.textContent = _('上传失败'); });
                 };
                 reader.readAsArrayBuffer(file);
             });
             let node = E('div', { class: 'cbi-section' }, [
                 E('h3', {}, _('上传配置文件')),
                 E('p', { class: 'cbi-value-description' }, _('上传本地 .yaml / .yml 文件作为配置来源（存入 upload/ 目录）')),
-                E('div', { class: 'cbi-section-node' }, [input, btn, status])
+                E('div', { class: 'cbi-section-node' }, [
+                    input,
+                    E('div', {}, [btn, status])
+                ])
             ]);
             return Promise.resolve(node);
         };
