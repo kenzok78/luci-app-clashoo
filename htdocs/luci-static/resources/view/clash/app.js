@@ -69,6 +69,7 @@ return view.extend({
         o.value('redirect', 'Redirect 模式');
         o.value('tproxy',   'TPROXY 模式');
         o.value('tun',      'TUN 模式');
+        o.default = 'redirect';
         o.description = 'Redirect：NAT 重定向，兼容性最好；TPROXY：透明代理，性能更好；TUN：虚拟网卡，支持所有协议';
 
         o = s.option(form.ListValue, 'udp_mode', 'UDP 模式');
@@ -76,6 +77,7 @@ return view.extend({
         o.placeholder = '禁用';
         o.value('tproxy', 'TPROXY 模式');
         o.value('tun',    'TUN 模式');
+        o.default = 'tun';
         o.description = 'TPROXY：需内核支持 IP_TRANSPARENT；TUN：与 TCP TUN 模式配合使用';
 
         o = s.option(form.ListValue, 'stack', 'TUN 协议栈');
@@ -88,22 +90,27 @@ return view.extend({
         o.depends('tcp_mode', 'tun');
 
         o = s.option(form.Flag, 'ipv4_dns_hijack', 'IPv4 DNS 劫持');
+        o.default = '1';
         o.rmempty = false;
         o.description = '劫持 IPv4 DNS 请求，转发至 Clash DNS 处理';
 
         o = s.option(form.Flag, 'ipv6_dns_hijack', 'IPv6 DNS 劫持');
+        o.default = '1';
         o.rmempty = false;
         o.description = '劫持 IPv6 DNS 请求，转发至 Clash DNS 处理';
 
         o = s.option(form.Flag, 'ipv4_proxy', 'IPv4 代理');
+        o.default = '1';
         o.rmempty = false;
         o.description = '对 IPv4 流量启用透明代理';
 
         o = s.option(form.Flag, 'ipv6_proxy', 'IPv6 代理');
+        o.default = '1';
         o.rmempty = false;
         o.description = '对 IPv6 流量启用透明代理';
 
         o = s.option(form.Flag, 'fake_ip_ping_hijack', 'Fake-IP Ping 劫持');
+        o.default = '1';
         o.rmempty = false;
         o.description = 'Fake-IP 模式下劫持 ICMP ping 请求，避免 ping 结果异常';
 
