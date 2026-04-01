@@ -11,70 +11,47 @@ function index()
 		return
 	end
 
-	-- luci 24.10+ 通过 menu.d JSON 注册菜单，此处只保留 API 路由
+	-- luci 24.10+ 通过 menu.d JSON 注册菜单
 	local has_menu_d = nixio.fs.access("/usr/share/luci/menu.d/luci-app-clash.json")
 	if not has_menu_d then
-		local page = entry({"admin", "services", "clash"},alias("admin", "services", "clash", "overview"), "Clash", 1)
+		local page = entry({"admin", "services", "clash"}, alias("admin", "services", "clash", "overview"), "Clash", 1)
 		page.dependent = true
 		page.acl_depends = {"luci-app-clash"}
 
-		entry({"admin", "services", "clash", "overview"},cbi("clash/overview"),"概览", 10).leaf = true
-		entry({"admin", "services", "clash", "client"},cbi("clash/client/client"),"客户端", 20).leaf = true
-		entry({"admin", "services", "clash", "system"},cbi("clash/system"),"系统设置", 22).leaf = true
+		entry({"admin", "services", "clash", "overview"},    cbi("clash/overview"),          "概览",     10).leaf = true
+		entry({"admin", "services", "clash", "system"},      cbi("clash/system"),            "系统设置", 20).leaf = true
+		entry({"admin", "services", "clash", "config_manager"}, cbi("clash/config_manager"), "配置管理", 30).leaf = true
+		entry({"admin", "services", "clash", "dns_settings"},cbi("clash/dns_settings"),      "DNS 设置", 40).leaf = true
 
-		entry({"admin", "services", "clash", "config"}, firstchild(),"订阅与配置", 25)
-		entry({"admin", "services", "clash", "config", "import"},cbi("clash/config/import"),"导入订阅", 25).leaf = true
-		entry({"admin", "services", "clash", "config", "config"},cbi("clash/config/config"),"配置文件", 30).leaf = true
-		entry({"admin", "services", "clash", "config", "create"},cbi("clash/config/create"),"生成配置", 35).leaf = true
-		entry({"admin", "services", "clash", "config_manager"},cbi("clash/config_manager"),"配置管理", 32).leaf = true
-		entry({"admin", "services", "clash", "dns_settings"},cbi("clash/dns_settings"),"DNS 设置", 33).leaf = true
-		entry({"admin", "services", "clash", "proxyprovider"},cbi("clash/config/proxy_provider"), nil).leaf = true
-		entry({"admin", "services", "clash", "servers"},cbi("clash/config/servers-config"), nil).leaf = true
-		entry({"admin", "services", "clash", "ruleprovider"},cbi("clash/config/rule_provider"), nil).leaf = true
-		entry({"admin", "services", "clash", "rules"},cbi("clash/config/rules"), nil).leaf = true
-		entry({"admin", "services", "clash", "pgroups"},cbi("clash/config/groups"), nil).leaf = true
-		entry({"admin", "services", "clash", "rulemanager"},cbi("clash/config/ruleprovider_manager"), nil).leaf = true
-
-		entry({"admin", "services", "clash", "settings"}, firstchild(),"运行设置", 40)
-		entry({"admin", "services", "clash", "settings", "port"},cbi("clash/dns/port"),_("入站配置"), 60).leaf = true
-		entry({"admin", "services", "clash", "settings", "geoip"},cbi("clash/geoip/geoip"),"GeoIP 更新", 80).leaf = true
-		entry({"admin", "services", "clash", "settings", "other"},cbi("clash/other"),"其它设置", 92).leaf = true
-		entry({"admin", "services", "clash", "ip-rules"},cbi("clash/config/ip-rules"), nil).leaf = true
-		entry({"admin", "services", "clash", "settings", "dns"},firstchild(),"DNS 设置", 65)
-		entry({"admin", "services", "clash", "settings", "dns", "dns"},cbi("clash/dns/dns"),"Clash DNS", 70).leaf = true
-		entry({"admin", "services", "clash", "settings", "dns", "advance"},cbi("clash/dns/advance"),"高级 DNS", 75).leaf = true
-
-		entry({"admin", "services", "clash", "update"},cbi("clash/update/update"),"更新", 45).leaf = true
-		entry({"admin", "services", "clash", "log"},cbi("clash/logs/log"),"日志", 50).leaf = true
+		-- 隐藏子页（被 config_manager 内部跳转使用）
+		entry({"admin", "services", "clash", "proxyprovider"}, cbi("clash/config/proxy_provider"),      nil).leaf = true
+		entry({"admin", "services", "clash", "servers"},       cbi("clash/config/servers-config"),       nil).leaf = true
+		entry({"admin", "services", "clash", "ruleprovider"},  cbi("clash/config/rule_provider"),        nil).leaf = true
+		entry({"admin", "services", "clash", "rules"},         cbi("clash/config/rules"),                nil).leaf = true
+		entry({"admin", "services", "clash", "pgroups"},       cbi("clash/config/groups"),               nil).leaf = true
+		entry({"admin", "services", "clash", "rulemanager"},   cbi("clash/config/ruleprovider_manager"), nil).leaf = true
+		entry({"admin", "services", "clash", "ip-rules"},      cbi("clash/config/ip-rules"),             nil).leaf = true
 	end
 
-	-- API 路由（两版本都需要）
-	entry({"admin","services","clash","check_status"},call("check_status")).leaf=true
-	entry({"admin", "services", "clash", "ping"}, call("act_ping")).leaf=true
-	entry({"admin", "services", "clash", "readlog"},call("action_read")).leaf=true
-	entry({"admin","services","clash", "status"},call("action_status")).leaf=true
-	entry({"admin", "services", "clash", "check"}, call("check_update_log")).leaf=true
-	entry({"admin", "services", "clash", "doupdate"}, call("do_update")).leaf=true
-	entry({"admin", "services", "clash", "start"}, call("do_start")).leaf=true
-	entry({"admin", "services", "clash", "stop"}, call("do_stop")).leaf=true
-	entry({"admin", "services", "clash", "reload"}, call("do_reload")).leaf=true
-	entry({"admin", "services", "clash", "set_mode"}, call("do_set_mode")).leaf=true
-	entry({"admin", "services", "clash", "list_configs"}, call("action_list_configs")).leaf=true
-	entry({"admin", "services", "clash", "set_config"}, call("do_set_config")).leaf=true
-	entry({"admin", "services", "clash", "set_config_type"}, call("do_set_config_type")).leaf=true
-	entry({"admin", "services", "clash", "set_proxy_mode"}, call("do_set_proxy_mode")).leaf=true
-	entry({"admin", "services", "clash", "set_panel"}, call("do_set_panel")).leaf=true
-	entry({"admin", "services", "clash", "download_panel"}, call("do_download_panel")).leaf=true
-	entry({"admin", "services", "clash", "geo"}, call("geoip_check")).leaf=true
-	entry({"admin", "services", "clash", "geoipupdate"}, call("geoip_update")).leaf=true
-	entry({"admin", "services", "clash", "check_geoip"}, call("check_geoip_log")).leaf=true	
-	entry({"admin", "services", "clash", "corelog"},call("down_check")).leaf=true
-	entry({"admin", "services", "clash", "logstatus"},call("logstatus_check")).leaf=true
-	entry({"admin", "services", "clash", "conf"},call("action_conf")).leaf=true
-	entry({"admin", "services", "clash", "update_config"},call("action_update")).leaf=true
-	entry({"admin", "services", "clash", "ruleproviders"},call("action_update_rule_providers")).leaf=true
-	entry({"admin", "services", "clash", "ping_check"},call("action_ping_status")).leaf=true
-	
+	-- API 路由
+	entry({"admin", "services", "clash", "check_status"}, call("check_status")).leaf = true
+	entry({"admin", "services", "clash", "readlog"},       call("action_read")).leaf = true
+	entry({"admin", "services", "clash", "status"},        call("action_status")).leaf = true
+	entry({"admin", "services", "clash", "set_mode"},      call("do_set_mode")).leaf = true
+	entry({"admin", "services", "clash", "set_proxy_mode"},call("do_set_proxy_mode")).leaf = true
+	entry({"admin", "services", "clash", "start"},         call("do_start")).leaf = true
+	entry({"admin", "services", "clash", "stop"},          call("do_stop")).leaf = true
+	entry({"admin", "services", "clash", "reload"},        call("do_reload")).leaf = true
+	entry({"admin", "services", "clash", "list_configs"},  call("action_list_configs")).leaf = true
+	entry({"admin", "services", "clash", "set_config"},    call("do_set_config")).leaf = true
+	entry({"admin", "services", "clash", "doupdate"},      call("do_update")).leaf = true
+	entry({"admin", "services", "clash", "check"},         call("check_update_log")).leaf = true
+	entry({"admin", "services", "clash", "corelog"},       call("down_check")).leaf = true
+	entry({"admin", "services", "clash", "logstatus"},     call("logstatus_check")).leaf = true
+	entry({"admin", "services", "clash", "geo"},           call("geoip_check")).leaf = true
+	entry({"admin", "services", "clash", "geoipupdate"},   call("geoip_update")).leaf = true
+	entry({"admin", "services", "clash", "check_geoip"},   call("check_geoip_log")).leaf = true
+
 end
 
 local fss = require "luci.clash"
