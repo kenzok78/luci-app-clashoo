@@ -151,7 +151,7 @@ return view.extend({
         o.placeholder = '7892';
         o.description = 'TPROXY 模式监听端口（mihomo: tproxy-port），TCP/UDP TPROXY 任一启用时生效';
 
-        o = s.option(form.Value, 'dash_port', '外部控制端口（面板）');
+        o = s.option(form.Value, 'dash_port', '面板端口');
         o.datatype    = 'port';
         o.default     = '9090';
         o.placeholder = '9090';

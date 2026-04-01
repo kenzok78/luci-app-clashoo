@@ -169,14 +169,12 @@ return view.extend({
         s.render = function () {
             let input = E('input', {
                 type: 'file', accept: '.yaml,.yml',
-                id: 'cfg-upload-input',
-                style: 'display:block;margin-bottom:8px'
+                id: 'cfg-upload-input'
             });
             let status = E('span', { style: 'margin-left:8px;color:#666;font-size:.9rem' }, '');
             let btn = E('button', {
                 type: 'button',
-                class: 'btn cbi-button cbi-button-apply',
-                style: 'margin-top:4px'
+                class: 'btn cbi-button cbi-button-apply'
             }, _('上传'));
             btn.addEventListener('click', () => {
                 let files = input.files;
@@ -194,16 +192,88 @@ return view.extend({
                 };
                 reader.readAsArrayBuffer(file);
             });
+            /* Use same cbi-value row structure as form.Button so the button
+               sits in the value column and aligns with "下载订阅" above */
             let node = E('div', { class: 'cbi-section' }, [
                 E('h3', {}, _('上传配置文件')),
                 E('p', { class: 'cbi-value-description' }, _('上传本地 .yaml / .yml 文件作为配置来源（存入 upload/ 目录）')),
                 E('div', { class: 'cbi-section-node' }, [
-                    input,
-                    E('div', {}, [btn, status])
+                    E('div', { class: 'cbi-value' }, [
+                        E('label', { class: 'cbi-value-title' }, ''),
+                        E('div', { class: 'cbi-value-field' }, [input])
+                    ]),
+                    E('div', { class: 'cbi-value' }, [
+                        E('label', { class: 'cbi-value-title' }, ''),
+                        E('div', { class: 'cbi-value-field' }, [btn, status])
+                    ])
                 ])
             ]);
             return Promise.resolve(node);
         };
+
+        /* ─── 面板配置 ─── */
+        s = m.section(form.NamedSection, 'config', 'clash', _('面板配置'));
+        s.description = _('Web 控制面板相关设置（mihomo: external-controller / external-ui）');
+        s.anonymous = false;
+
+        o = s.option(form.Value, 'dash_port', _('面板端口'));
+        o.datatype    = 'port';
+        o.default     = '9090';
+        o.placeholder = '9090';
+        o.description = 'RESTful API 及 Web 面板监听端口（mihomo: external-controller）';
+
+        o = s.option(form.Value, 'ui_path', _('UI 路径'));
+        o.placeholder = 'ui';
+        o.description = _('面板文件存放路径（相对于配置目录）');
+        o.rmempty = true;
+
+        o = s.option(form.Value, 'ui_name', _('UI 名称'));
+        o.placeholder = _('不修改');
+        o.rmempty = true;
+
+        o = s.option(form.ListValue, 'ui_url', _('UI 下载地址'));
+        o.optional = true;
+        o.rmempty = true;
+        o.value('', _('不修改'));
+        o.value('https://github.com/Zephyruso/zashboard/releases/latest/download/dist-cdn-fonts.zip', 'Zashboard (CDN Fonts)');
+        o.value('https://github.com/Zephyruso/zashboard/releases/latest/download/dist.zip', 'Zashboard');
+        o.value('https://github.com/MetaCubeX/metacubexd/archive/refs/heads/gh-pages.zip', 'MetaCubeXD');
+        o.value('https://github.com/MetaCubeX/Yacd-meta/archive/refs/heads/gh-pages.zip', 'YACD');
+        o.value('https://github.com/MetaCubeX/Razord-meta/archive/refs/heads/gh-pages.zip', 'Razord');
+
+        o = s.option(form.Value, 'api_listen', _('API 监听'));
+        o.placeholder = '[::]:9090';
+        o.rmempty = true;
+        o.description = _('指定 API 完整监听地址（留空则使用面板端口）');
+
+        o = s.option(form.Value, 'api_tls_listen', _('API TLS Listen'));
+        o.placeholder = '[::]:9443';
+        o.rmempty = true;
+
+        o = s.option(form.Value, 'api_tls_cert', _('API TLS Cert'));
+        o.placeholder = _('不修改');
+        o.rmempty = true;
+
+        o = s.option(form.Value, 'api_tls_key', _('API TLS Key'));
+        o.placeholder = _('不修改');
+        o.rmempty = true;
+
+        o = s.option(form.Value, 'api_tls_ech_key', _('API TLS ECH Key'));
+        o.placeholder = _('不修改');
+        o.rmempty = true;
+
+        o = s.option(form.Value, 'api_secret', _('API 密钥'));
+        o.password = true;
+        o.placeholder = '••••••';
+        o.rmempty = true;
+        o.description = _('访问 RESTful API 所需密钥（留空不设置）');
+
+        o = s.option(form.ListValue, 'selection_cache', _('保存节点/策略组选择'));
+        o.optional = true;
+        o.value('', _('不修改'));
+        o.value('0', _('禁用'));
+        o.value('1', _('启用'));
+        o.default = '1';
 
         /* ─── 已上传文件列表 ─── */
         let uploadFiles = uploadData.files || [];
