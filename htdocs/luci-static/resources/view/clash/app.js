@@ -174,13 +174,6 @@ return view.extend({
         o.depends('access_control', '2');
 
 
-        return m.render().then(function(node) {
-            let style = E('style', {}, [
-                '.cbi-section .cbi-input-select { width: 100% !important; max-width: 100% !important; box-sizing: border-box !important; }',
-                '.cbi-section .cbi-input-text { width: 100% !important; max-width: 100% !important; box-sizing: border-box !important; }'
-            ]);
-            node.insertBefore(style, node.firstChild);
-            return node;
-        });
+        return m.render();
     }
 });
