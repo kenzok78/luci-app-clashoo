@@ -104,12 +104,14 @@ return view.extend({
 
         o = s.option(form.Value, 'geosite_url', _('GeoSite 订阅链接'));
         o.rmempty = true;
+        o.placeholder = 'https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geosite.dat';
         o.depends('geoip_source', '2');
         o.depends('geoip_source', '3');
         o.depends('geoip_source', '4');
 
         o = s.option(form.Value, 'geoip_dat_url', _('GeoIP（DAT）订阅链接'));
         o.rmempty = true;
+        o.placeholder = 'https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geoip.dat';
         o.depends('geoip_source', '2');
         o.depends('geoip_source', '3');
         o.depends('geoip_source', '4');
@@ -183,19 +185,21 @@ return view.extend({
         o.description = _('定时拉取当前使用的订阅配置');
 
         o = s.option(form.ListValue, 'auto_update_time', _('更新频率'));
-        o.value('1', '每小时');
-        o.value('6', '每 6 小时');
-        o.value('12', '每 12 小时');
-        o.value('24', '每 24 小时');
+        o.value('1',  '每 1 天');
+        o.value('7',  '每 7 天');
+        o.value('10', '每 10 天');
+        o.value('30', '每 30 天');
+        o.default = '7';
         o.depends('auto_update', '1');
 
         o = s.option(form.Flag, 'auto_clear_log', _('自动清理日志'));
 
         o = s.option(form.ListValue, 'clear_time', _('清理频率'));
-        o.value('1', '每小时');
-        o.value('6', '每 6 小时');
-        o.value('12', '每 12 小时');
-        o.value('24', '每 24 小时');
+        o.value('1',  '每 1 天');
+        o.value('7',  '每 7 天');
+        o.value('10', '每 10 天');
+        o.value('30', '每 30 天');
+        o.default = '7';
         o.depends('auto_clear_log', '1');
 
         return m.render();

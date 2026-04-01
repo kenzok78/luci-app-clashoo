@@ -220,7 +220,7 @@ return view.extend({
         return m.render();
     },
 
-    handleSaveApply: null,
-    handleSave: null,
-    handleReset: null
+    handleSaveApply: function (ev) {
+        return this.handleSave(ev).then(() => clash.restart());
+    }
 });
