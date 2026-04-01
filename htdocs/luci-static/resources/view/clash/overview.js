@@ -85,7 +85,7 @@ return view.extend({
             /* Control table */
             E('div', { class: 'cbi-section' }, [
                 E('div', { class: 'cbi-section-node' }, [
-                    E('table', { style: 'width:100%;border-collapse:collapse' }, [
+                    E('table', { style: 'width:100%;max-width:680px;margin:0 auto;border-collapse:collapse' }, [
                         mkRow('Clash 客户端',  'ov-client'),
                         mkRow('Clash 模式',    'ov-mode'),
                         mkRow('Clash 配置',    'ov-config'),
