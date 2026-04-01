@@ -63,27 +63,28 @@ return view.extend({
 
         function mkRow(label, tdId) {
             return E('tr', {}, [
-                E('td', { style: 'width:200px;padding:8px 12px;color:#555;font-size:.95rem;vertical-align:middle;white-space:nowrap' }, label),
+                E('td', { style: 'width:35%;padding:8px 12px;color:#555;font-size:.95rem;vertical-align:middle;white-space:nowrap' }, label),
                 E('td', { id: tdId, style: 'padding:6px 12px;vertical-align:middle' })
             ]);
         }
 
         /* ── structure ── */
         let node = E('div', {}, [
-            /* Hero */
-            E('div', { class: 'cbi-section', style: 'text-align:center;padding:18px 0 14px' }, [
-                E('img', {
-                    src: '/luci-static/clash/logo.png',
-                    style: 'width:56px;height:56px;object-fit:contain;display:block;margin:0 auto 8px',
-                    onerror: "this.style.display='none'",
-                    alt: 'Clash'
-                }),
-                E('p', { id: 'ov-title', style: 'margin:0;font-weight:600;font-size:1.05rem;color:#333' }, 'Clash'),
-                E('p', { style: 'margin:4px 0 0;font-size:.88rem;color:#888' }, '基于规则的自定义代理客户端')
-            ]),
-
-            /* Control table */
+            /* Hero + controls share the same centered wrapper */
             E('div', { class: 'cbi-section' }, [
+                /* Hero */
+                E('div', { style: 'text-align:center;padding:18px 0 14px' }, [
+                    E('img', {
+                        src: '/luci-static/clash/logo.png',
+                        style: 'width:56px;height:56px;object-fit:contain;display:block;margin:0 auto 8px',
+                        onerror: "this.style.display='none'",
+                        alt: 'Clash'
+                    }),
+                    E('p', { id: 'ov-title', style: 'margin:0;font-weight:600;font-size:1.05rem;color:#333' }, 'Clash'),
+                    E('p', { style: 'margin:4px 0 0;font-size:.88rem;color:#888' }, '基于规则的自定义代理客户端')
+                ]),
+                E('hr', { style: 'border:none;border-top:1px solid #eee;margin:8px 0 4px' }),
+                /* Control table — same section, same padding reference */
                 E('div', { class: 'cbi-section-node' }, [
                     E('table', { style: 'width:100%;border-collapse:collapse' }, [
                         mkRow('Clash 客户端',  'ov-client'),
