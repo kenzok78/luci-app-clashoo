@@ -87,91 +87,61 @@ return view.extend({
         o.description = 'TUN 模式专用；mixed 综合性能最佳，为 Mihomo 官方推荐值';
         o.depends('tcp_mode', 'tun');
 
+        o = s.option(form.Flag, 'ipv4_dns_hijack', 'IPv4 DNS 劫持');
+        o.rmempty = false;
+        o.description = '劫持 IPv4 DNS 请求，转发至 Clash DNS 处理';
+
+        o = s.option(form.Flag, 'ipv6_dns_hijack', 'IPv6 DNS 劫持');
+        o.rmempty = false;
+        o.description = '劫持 IPv6 DNS 请求，转发至 Clash DNS 处理';
+
+        o = s.option(form.Flag, 'ipv4_proxy', 'IPv4 代理');
+        o.rmempty = false;
+        o.description = '对 IPv4 流量启用透明代理';
+
+        o = s.option(form.Flag, 'ipv6_proxy', 'IPv6 代理');
+        o.rmempty = false;
+        o.description = '对 IPv6 流量启用透明代理';
+
+        o = s.option(form.Flag, 'fake_ip_ping_hijack', 'Fake-IP Ping 劫持');
+        o.rmempty = false;
+        o.description = 'Fake-IP 模式下劫持 ICMP ping 请求，避免 ping 结果异常';
+
+        /* ── 端口配置 ── */
+        s = m.section(form.NamedSection, 'config', 'clash', '端口配置');
+
+        o = s.option(form.Flag, 'allow_lan', '允许局域网连接');
+        o.rmempty = false;
+
+        o = s.option(form.Value, 'http_port', 'HTTP 代理端口');
+        o.datatype    = 'port';
+        o.placeholder = '8080';
+        o.description = 'HTTP/HTTPS 代理端口（mihomo: port）';
+
+        o = s.option(form.Value, 'socks_port', 'SOCKS5 代理端口');
+        o.datatype    = 'port';
+        o.placeholder = '1080';
+        o.description = 'SOCKS5 代理端口（mihomo: socks-port）';
+
+        o = s.option(form.Value, 'mixed_port', '混合端口（HTTP + SOCKS5）');
+        o.datatype    = 'port';
+        o.placeholder = '7890';
+        o.description = 'HTTP 与 SOCKS5 共用端口（mihomo: mixed-port）';
+
         o = s.option(form.Value, 'redir_port', 'Redirect 端口');
         o.datatype    = 'port';
         o.placeholder = '7891';
         o.description = 'TCP Redirect 模式监听端口（mihomo: redir-port）';
-        o.depends('tcp_mode', 'redirect');
 
         o = s.option(form.Value, 'tproxy_port', 'TPROXY 端口');
         o.datatype    = 'port';
         o.placeholder = '7892';
         o.description = 'TPROXY 模式监听端口（mihomo: tproxy-port），TCP/UDP TPROXY 任一启用时生效';
-        o.depends('tcp_mode', 'tproxy');
-        o.depends('udp_mode', 'tproxy');
-
-        /* ── 端口配置 ── */
-        s = m.section(form.NamedSection, 'config', 'clash', '端口配置');
-
-        o = s.option(form.Value, 'http_port', 'HTTP 代理端口');
-        o.datatype    = 'port';
-        o.placeholder = '8080';
-
-        o = s.option(form.Value, 'socks_port', 'SOCKS5 代理端口');
-        o.datatype    = 'port';
-        o.placeholder = '1080';
-
-        o = s.option(form.Value, 'mixed_port', '混合端口（HTTP + SOCKS5）');
-        o.datatype    = 'port';
-        o.placeholder = '7890';
 
         o = s.option(form.Value, 'dash_port', '外部控制端口（面板）');
         o.datatype    = 'port';
         o.placeholder = '9090';
-
-        o = s.option(form.Flag, 'allow_lan', '允许局域网连接');
-        o.rmempty = false;
-
-
-        /* ── 绕过 ── */
-        s = m.section(form.NamedSection, 'config', 'clash', '绕过');
-
-        o = s.option(form.Flag, 'bypass_china', '绕过中国大陆 IP');
-        o.rmempty = false;
-        o.description = '目标为中国大陆 IP 时直连，不经过代理（需 /usr/share/clash/china_ip.txt）';
-
-        o = s.option(form.ListValue, 'proxy_tcp_dport', '要代理的 TCP 目标端口');
-        o.optional    = true;
-        o.placeholder = '全部端口';
-        o.value('21 22 80 110 143 194 443 465 853 993 995 8080 8443', '常用端口');
-
-        o = s.option(form.ListValue, 'proxy_udp_dport', '要代理的 UDP 目标端口');
-        o.optional    = true;
-        o.placeholder = '全部端口';
-        o.value('123 443 8443', '常用端口');
-
-        o = s.option(form.DynamicList, 'bypass_dscp', '绕过 DSCP');
-        o.datatype = 'range(0, 63)';
-        o.rmempty  = true;
-        o.description = '此 DSCP 标记的流量不走代理，范围 0-63';
-
-        o = s.option(form.DynamicList, 'bypass_fwmark', '绕过 FWMark');
-        o.rmempty  = true;
-        o.description = '此防火墙标记的流量不走代理';
-
-        /* ── 局域网访问控制 ── */
-        s = m.section(form.NamedSection, 'config', 'clash', '局域网访问控制');
-        s.description = '控制哪些局域网设备走代理（按来源 IP 过滤）';
-
-        o = s.option(form.ListValue, 'access_control', '控制模式');
-        o.value('0', '关闭（所有设备走代理）');
-        o.value('1', '白名单（仅列表中的设备走代理）');
-        o.value('2', '黑名单（列表中的设备不走代理）');
-        o.default = '0';
-
-        o = s.option(form.DynamicList, 'proxy_lan_ips', '白名单设备 IP');
-        o.datatype = 'ip4addr';
-        o.rmempty  = true;
-        o.retain   = true;
-        o.description = '支持 CIDR，如 192.168.1.100 或 192.168.2.0/24';
-        o.depends('access_control', '1');
-
-        o = s.option(form.DynamicList, 'reject_lan_ips', '黑名单设备 IP');
-        o.datatype = 'ip4addr';
-        o.rmempty  = true;
-        o.retain   = true;
-        o.description = '支持 CIDR，如 192.168.1.200 或 192.168.3.0/24';
-        o.depends('access_control', '2');
+        o.description = 'RESTful API 及 Web 面板监听端口（mihomo: external-controller）';
 
 
         return m.render();

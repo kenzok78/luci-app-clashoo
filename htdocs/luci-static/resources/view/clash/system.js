@@ -131,6 +131,25 @@ return view.extend({
         o.default = '0';
         o.description = _('目标为中国大陆 IP 时直连，不经过代理（需要 /usr/share/clash/china_ip.txt）');
 
+        o = s.option(form.Value, 'proxy_tcp_dport', _('要代理的 TCP 目标端口'));
+        o.optional    = true;
+        o.placeholder = _('全部端口');
+        o.description = _('仅代理指定 TCP 端口，留空表示全部；可填多个空格分隔，如：80 443 8080');
+
+        o = s.option(form.Value, 'proxy_udp_dport', _('要代理的 UDP 目标端口'));
+        o.optional    = true;
+        o.placeholder = _('全部端口');
+        o.description = _('仅代理指定 UDP 端口，留空表示全部；可填多个空格分隔，如：443 8443');
+
+        o = s.option(form.DynamicList, 'bypass_dscp', _('绕过 DSCP'));
+        o.datatype = 'range(0, 63)';
+        o.rmempty  = true;
+        o.description = _('此 DSCP 标记的流量不走代理，范围 0–63');
+
+        o = s.option(form.DynamicList, 'bypass_fwmark', _('绕过 FWMark'));
+        o.rmempty  = true;
+        o.description = _('此防火墙标记的流量不走代理');
+
         /* ─── 局域网访问控制 ─── */
         s = m.section(form.NamedSection, 'config', 'clash', _('局域网访问控制'));
         s.description = _('控制哪些局域网设备走代理（按来源 IP 过滤）');
@@ -144,12 +163,16 @@ return view.extend({
 
         o = s.option(form.DynamicList, 'proxy_lan_ips', _('白名单设备 IP'));
         o.datatype = 'ip4addr';
-        o.rmempty = true;
+        o.rmempty  = true;
+        o.retain   = true;
+        o.description = _('支持 CIDR，如 192.168.1.100 或 192.168.2.0/24');
         o.depends('access_control', '1');
 
         o = s.option(form.DynamicList, 'reject_lan_ips', _('黑名单设备 IP'));
         o.datatype = 'ip4addr';
-        o.rmempty = true;
+        o.rmempty  = true;
+        o.retain   = true;
+        o.description = _('支持 CIDR，如 192.168.1.200 或 192.168.3.0/24');
         o.depends('access_control', '2');
 
         /* ─── 自动化任务 ─── */
