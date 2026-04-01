@@ -30,27 +30,41 @@ return view.extend({
             return sel;
         }
 
+        const BTN_STYLE = [
+            'display:inline-block',
+            'min-width:80px',
+            'height:36px',
+            'line-height:36px',
+            'padding:0 14px',
+            'border:none',
+            'border-radius:.375rem',
+            'font-size:.9rem',
+            'cursor:pointer',
+            'color:#fff',
+            'text-align:center',
+            'white-space:nowrap',
+            'box-sizing:border-box'
+        ].join(';');
+
         function mkBtn(label, bg, onClick) {
             let b = E('button', {
                 type: 'button',
-                style: [
-                    'padding:.42rem 1.1rem',
-                    'border:none',
-                    'border-radius:.375rem',
-                    'font-size:.95rem',
-                    'cursor:pointer',
-                    'color:#fff',
-                    'background:' + bg
-                ].join(';')
+                style: BTN_STYLE + ';background:' + bg
             }, label);
             if (onClick) b.addEventListener('click', onClick);
             return b;
         }
 
+        function mkBtnGroup() {
+            return E('div', {
+                style: 'display:flex;flex-wrap:wrap;gap:6px;align-items:center'
+            });
+        }
+
         function mkRow(label, tdId) {
             return E('tr', {}, [
-                E('td', { style: 'width:50%;padding:8px 12px;color:#555;font-size:.95rem' }, label),
-                E('td', { id: tdId, style: 'padding:6px 12px' })
+                E('td', { style: 'width:45%;padding:8px 12px;color:#555;font-size:.95rem;vertical-align:middle' }, label),
+                E('td', { id: tdId, style: 'padding:6px 12px;vertical-align:middle' })
             ]);
         }
 
@@ -104,13 +118,13 @@ return view.extend({
             let elClient = document.getElementById('ov-client');
             if (elClient) {
                 elClient.innerHTML = '';
-                elClient.appendChild(E('span', { style: 'display:inline-flex;gap:8px;align-items:center' }, [
-                    mkBtn(running ? '运行中' : '已停止',
-                          running ? '#1f8b4c' : '#b58900', null),
-                    running
-                        ? mkBtn('停止客户端', '#6c757d', () => clash.stop())
-                        : mkBtn('启用客户端', '#6366f1', () => clash.start())
-                ]));
+                let grp = mkBtnGroup();
+                grp.appendChild(mkBtn(running ? '运行中' : '已停止',
+                    running ? '#1f8b4c' : '#b58900', null));
+                grp.appendChild(running
+                    ? mkBtn('停止客户端', '#6c757d', () => clash.stop())
+                    : mkBtn('启用客户端', '#adb5bd', () => clash.start()));
+                elClient.appendChild(grp);
             }
 
             /* Mode */
@@ -163,15 +177,18 @@ return view.extend({
                 elAddr.innerHTML = '';
                 let authSuffix = dashPass ? '?secret=' + encodeURIComponent(dashPass) : '';
                 let panelUrl   = 'http://' + localIp + ':' + dashPort + '/ui' + authSuffix;
-                elAddr.appendChild(E('span', { style: 'display:inline-flex;gap:8px;align-items:center' }, [
-                    mkBtn('更新面板', '#0d8f5b', () => clash.updatePanel(panelType)),
-                    dashOk
-                        ? E('a', {
-                            href: panelUrl, target: '_blank', rel: 'noopener',
-                            style: 'padding:.42rem 1.1rem;border-radius:.375rem;font-size:.95rem;color:#fff;background:#6c757d;text-decoration:none'
-                          }, '打开面板')
-                        : mkBtn('打开面板', '#aaa', null)
-                ]));
+                let grp = mkBtnGroup();
+                grp.appendChild(mkBtn('更新面板', '#0d8f5b', () => clash.updatePanel(panelType)));
+                if (dashOk) {
+                    let a = E('a', {
+                        href: panelUrl, target: '_blank', rel: 'noopener',
+                        style: BTN_STYLE + ';background:#adb5bd;text-decoration:none'
+                    }, '打开面板');
+                    grp.appendChild(a);
+                } else {
+                    grp.appendChild(mkBtn('打开面板', '#adb5bd', null));
+                }
+                elAddr.appendChild(grp);
             }
         }
 
