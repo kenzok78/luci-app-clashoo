@@ -1,73 +1,33 @@
 {
-    "admin/services/clash": {
-        "title": "Clash",
-        "action": {
-            "type": "firstchild"
-        },
-        "depends": {
-            "acl": [ "luci-app-clash" ],
-            "uci": { "clash": true }
-        }
-    },
-    "admin/services/clash/app": {
-        "title": "概览",
-        "order": 10,
-        "action": {
-            "type": "template",
-            "path": "clash/status"
-        }
-    },
-    "admin/services/clash/config": {
-        "title": "代理配置",
-        "order": 15,
-        "action": {
-            "type": "view",
-            "path": "clash/app"
-        }
-    },
-    "admin/services/clash/system": {
-        "title": "系统设置",
-        "order": 20,
-        "action": {
-            "type": "cbi",
-            "path": "clash/system"
-        }
-    },
-    "admin/services/clash/config_manager": {
-        "title": "配置管理",
-        "order": 30,
-        "action": {
-            "type": "cbi",
-            "path": "clash/config_manager"
-        }
-    },
-    "admin/services/clash/dns_settings": {
-        "title": "DNS 设置",
-        "order": 40,
-        "action": {
-            "type": "cbi",
-            "path": "clash/dns_settings"
-        }
-    },
-    "admin/services/clash/proxyprovider": {
-        "action": { "type": "cbi", "path": "clash/config/proxy_provider" }
-    },
-    "admin/services/clash/servers": {
-        "action": { "type": "cbi", "path": "clash/config/servers-config" }
-    },
-    "admin/services/clash/ruleprovider": {
-        "action": { "type": "cbi", "path": "clash/config/rule_provider" }
-    },
-    "admin/services/clash/rules": {
-        "action": { "type": "cbi", "path": "clash/config/rules" }
-    },
-    "admin/services/clash/pgroups": {
-        "action": { "type": "cbi", "path": "clash/config/groups" }
-    },
-    "admin/services/clash/rulemanager": {
-        "action": { "type": "cbi", "path": "clash/config/ruleprovider_manager" }
-    },
-    "admin/services/clash/ip-rules": {
-        "action": { "type": "cbi", "path": "clash/config/ip-rules" }
-    }
+  "admin/services/clash": {
+    "title": "Clash",
+    "order": 50,
+    "action": { "type": "firstchild" },
+    "icon": "/luci-static/clash/logo.png"
+  },
+  "admin/services/clash/overview": {
+    "title": "概览",
+    "order": 10,
+    "action": { "type": "view", "path": "clash/overview" }
+  },
+  "admin/services/clash/app": {
+    "title": "代理配置",
+    "order": 20,
+    "action": { "type": "view", "path": "clash/app" }
+  },
+  "admin/services/clash/config_manager": {
+    "title": "配置管理",
+    "order": 30,
+    "action": { "type": "view", "path": "clash/config" }
+  },
+  "admin/services/clash/dns_settings": {
+    "title": "DNS 设置",
+    "order": 40,
+    "action": { "type": "view", "path": "clash/dns" }
+  },
+  "admin/services/clash/system": {
+    "title": "系统设置",
+    "order": 50,
+    "action": { "type": "view", "path": "clash/system" }
+  }
 }
