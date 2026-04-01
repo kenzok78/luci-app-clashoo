@@ -268,7 +268,7 @@ body.dark .clash-hero-title,
 <fieldset class="cbi-section">
 	  <div class="clash-hero">
 		  <img src="/luci-static/clash/logo.png" class="clash-hero-logo" style="object-fit:contain;border-radius:8px" onerror="this.style.display='none'" alt="Clash" />
-		  <p width="100%" align="center" id="_realtimelog" class="clash-hero-title">mihomo</p>
+		  <p width="100%" align="center" id="_realtimelog" class="clash-hero-title">Clash</p>
 		  <p width="100%" align="center" class="clash-hero-subtitle"><%:Rule-based Custom Proxy Client%></p>
 		  <p width="100%" align="center" id="_downloadnew"></p>
 	  </div>
@@ -549,10 +549,18 @@ body.dark .clash-hero-title,
 					+ '</div>';
 			}
 
+			var clashRunning = !!status.clash;
 			if (!shouldSkipRender(clash)) {
-				clash.innerHTML = status.clash
-					? '<div class="clash-center-box"><span class="btn" style="background:#1f8b4c;color:#fff;padding:5px 10px;"><%:RUNNING%></span><button type="button" class="btn cbi-button" style="background:#c0392b;color:#fff;padding:5px 12px;" onclick="clashStop()"><%:Stop%></button></div>'
-					: '<div class="clash-center-box"><span class="btn" style="background:#b58900;color:#fff;padding:5px 10px;"><%:STOPPED%></span><button type="button" class="btn cbi-button" style="background:#1f8b4c;color:#fff;padding:5px 12px;" onclick="clashStart()"><%:Start%></button></div>';
+				if (window._clashRunningConfirm === clashRunning) {
+					if (window._lastClashRunning !== clashRunning) {
+						window._lastClashRunning = clashRunning;
+						clash.innerHTML = clashRunning
+							? '<div class="clash-center-box"><div class="clash-panel-actions"><span class="btn cbi-button" style="background:#1f8b4c;color:#fff;cursor:default;">运行中</span><button class="btn cbi-button" onclick="clashStop()">停止客户端</button></div></div>'
+							: '<div class="clash-center-box"><div class="clash-panel-actions"><span class="btn cbi-button" style="background:#b58900;color:#fff;cursor:default;">已停止</span><button type="button" class="btn cbi-button" style="background:#9ca3af;color:#fff;" onclick="clashStart()">启用客户端</button></div></div>';
+					}
+				} else {
+					window._clashRunningConfirm = clashRunning;
+				}
 			}
 
 			if (!shouldSkipRender(ip)) {
@@ -561,7 +569,7 @@ body.dark .clash-hero-title,
 					+ ' onclick="clashUpdatePanel()">'
 					+ (panelBusy ? '更新中...' : '更新面板')
 					+ '</button>';
-				var openBtn = '<button type="button" class="btn cbi-button" style="background:#6b7280;color:#fff;padding:5px 12px;"'
+				var openBtn = '<button type="button" class="btn cbi-button" style="background:#9ca3af;color:#fff;padding:5px 12px;"'
 					+ ((panelBusy || !panelInstalled) ? ' disabled' : '')
 					+ ' onclick="clashOpenPanel()">打开面板</button>';
 				ip.innerHTML = '<div class="clash-center-box"><div class="clash-panel-actions">' + updateBtn + openBtn + '</div></div>';
@@ -569,8 +577,9 @@ body.dark .clash-hero-title,
 
 			if (!shouldSkipRender(emode)) {
 				emode.innerHTML = '<div class="clash-center-box"><select class="cbi-input-select" onchange="clashSetMode(this)">' +
-					'<option value="fake-ip"' + (modeValue == 'fake-ip' ? ' selected' : '') + '><%:fake ip%></option>' +
-					'<option value="tun"' + (modeValue == 'tun' ? ' selected' : '') + '><%:Tun Mode%></option>' +
+					'<option value="fake-ip"' + (modeValue == 'fake-ip' ? ' selected' : '') + '>Fake-IP</option>' +
+					'<option value="tun"' + (modeValue == 'tun' ? ' selected' : '') + '>TUN 模式</option>' +
+					'<option value="mixed"' + (modeValue == 'mixed' ? ' selected' : '') + '>混合模式</option>' +
 					'</select></div>';
 			}
 
@@ -627,9 +636,10 @@ body.dark .clash-hero-title,
 	function normalizeRuntimeLabel(text) {
 		var t = (text || '').toString().trim();
 		if (!t)
-			return 'mihomo';
-		t = t.replace(/Clash\s+for\s+OpenWRT/gi, 'mihomo');
-		t = t.replace(/\bclash\b/gi, 'mihomo');
+			return 'Clash';
+		t = t.replace(/Clash\s+for\s+OpenWRT/gi, 'Clash');
+		t = t.replace(/\bmihomo\b/gi, 'Clash');
+		t = t.replace(/\bclash\b/gi, 'Clash');
 		t = t.replace(/\biptables\b/gi, '网络规则');
 		t = t.replace(/\bip6tables\b/gi, '网络规则');
 		t = t.replace(/TPROXY/gi, 'UDP 转发');
@@ -639,7 +649,7 @@ body.dark .clash-hero-title,
 	  if ( x && x.status == 200 ) {
 		var text = normalizeRuntimeLabel(status.readlog);
 		rtlog.textContent = text;
-		rtlog.classList.toggle('clash-hero-title-running', !!window._clashIsRunning && text === 'mihomo');
+		rtlog.classList.toggle('clash-hero-title-running', !!window._clashIsRunning && text === 'Clash');
 	  }
 	});
 	

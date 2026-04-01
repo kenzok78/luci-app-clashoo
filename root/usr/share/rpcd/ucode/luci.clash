@@ -3,6 +3,7 @@
 'use strict';
 
 import { access, popen, glob, readfile } from 'fs';
+import { cursor } from 'uci';
 
 const BINARY_PATHS = [
 	'/usr/bin/mihomo',
@@ -18,7 +19,32 @@ const LOG_PATHS = [
 	'/usr/share/clash/clash.txt'
 ];
 
-const PROFILE_DIRS = [
+const CONFIG_DIRS = [
+	{ path: '/usr/share/clash/config/sub',    type: '1' },
+	{ path: '/usr/share/clash/config/upload', type: '2' },
+	{ path: '/usr/share/clash/config/custom', type: '3' }
+];
+
+function list_config_files() {
+	let configs = [];
+	for (let dir in CONFIG_DIRS) {
+		let files = glob(dir.path + '/*.yaml') || [];
+		let ymlfiles = glob(dir.path + '/*.yml') || [];
+		for (let f in files)    push(configs, replace(f, dir.path + '/', ''));
+		for (let f in ymlfiles) push(configs, replace(f, dir.path + '/', ''));
+	}
+	configs = sort(configs);
+	return configs;
+}
+
+function get_current_config() {
+	let c = cursor();
+	c.load('clash');
+	let use_config = c.get('clash', 'config', 'use_config') || '';
+	return replace(use_config, /^.*\//, '');
+}
+
+
 	'/etc/clash/profiles',
 	'/etc/clash'
 ];
@@ -194,6 +220,56 @@ const methods = {
 				has_clash_meta: access('/usr/bin/clash-meta', 'x'),
 				has_builtin_core: access('/etc/clash/clash', 'x')
 			};
+		}
+	},
+
+	list_configs: {
+		call: function() {
+			return { configs: list_config_files(), current: get_current_config() };
+		}
+	},
+
+	set_config: {
+		args: { name: 'name' },
+		call: function(request) {
+			let name = request.args?.name || '';
+			if (!name) return { error: 'missing name' };
+
+			let found_path = '';
+			let found_type = '';
+			for (let dir in CONFIG_DIRS) {
+				let candidate = dir.path + '/' + name;
+				if (access(candidate, 'r')) {
+					found_path = candidate;
+					found_type = dir.type;
+					break;
+				}
+			}
+			if (!found_path) return { error: 'config not found: ' + name };
+
+			let c = cursor();
+			c.load('clash');
+			c.set('clash', 'config', 'use_config', found_path);
+			c.set('clash', 'config', 'config_type', found_type);
+			c.commit('clash');
+
+			let running = system('pgrep -x mihomo >/dev/null 2>&1') == 0 ||
+			              system('pgrep -x clash-meta >/dev/null 2>&1') == 0;
+			if (running) system('service clash restart >/dev/null 2>&1');
+
+			return { success: true };
+		}
+	},
+
+	start: {
+		call: function() {
+			return { success: system('service clash start >/dev/null 2>&1') == 0 };
+		}
+	},
+
+	stop: {
+		call: function() {
+			return { success: system('service clash stop >/dev/null 2>&1') == 0 };
 		}
 	}
 };

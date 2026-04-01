@@ -20,11 +20,14 @@ function index()
 
 		entry({"admin", "services", "clash", "overview"},cbi("clash/overview"),"概览", 10).leaf = true
 		entry({"admin", "services", "clash", "client"},cbi("clash/client/client"),"客户端", 20).leaf = true
+		entry({"admin", "services", "clash", "system"},cbi("clash/system"),"系统设置", 22).leaf = true
 
 		entry({"admin", "services", "clash", "config"}, firstchild(),"订阅与配置", 25)
 		entry({"admin", "services", "clash", "config", "import"},cbi("clash/config/import"),"导入订阅", 25).leaf = true
 		entry({"admin", "services", "clash", "config", "config"},cbi("clash/config/config"),"配置文件", 30).leaf = true
 		entry({"admin", "services", "clash", "config", "create"},cbi("clash/config/create"),"生成配置", 35).leaf = true
+		entry({"admin", "services", "clash", "config_manager"},cbi("clash/config_manager"),"配置管理", 32).leaf = true
+		entry({"admin", "services", "clash", "dns_settings"},cbi("clash/dns_settings"),"DNS 设置", 33).leaf = true
 		entry({"admin", "services", "clash", "proxyprovider"},cbi("clash/config/proxy_provider"), nil).leaf = true
 		entry({"admin", "services", "clash", "servers"},cbi("clash/config/servers-config"), nil).leaf = true
 		entry({"admin", "services", "clash", "ruleprovider"},cbi("clash/config/rule_provider"), nil).leaf = true
@@ -305,6 +308,11 @@ local function mode_value()
 	local tun = luci.sys.exec("uci get clash.config.tun_mode 2>/dev/null")
 	tun = tun and tun:gsub("\n", "") or "0"
 	if tun == "1" then
+		local stack = luci.sys.exec("uci -q get clash.config.stack 2>/dev/null")
+		stack = stack and stack:gsub("%s+", "") or "system"
+		if stack == "mixed" then
+			return "mixed"
+		end
 		return "tun"
 	end
 	return "fake-ip"
@@ -526,13 +534,13 @@ end
 
 function do_set_mode()
 	local mode = luci.http.formvalue("mode") or "fake-ip"
-	if mode ~= "tun" and mode ~= "fake-ip" then
+	if mode ~= "tun" and mode ~= "fake-ip" and mode ~= "mixed" then
 		luci.http.status(400, "Bad Request")
 		return
 	end
 
 	local rc
-	if mode == "tun" then
+	if mode == "tun" or mode == "mixed" then
 		local core = luci.sys.exec("uci -q get clash.config.core 2>/dev/null"):gsub("%s+", "")
 		local preferred = core
 		if core == "1" then
@@ -542,7 +550,10 @@ function do_set_mode()
 				preferred = "2"
 			end
 		end
-		rc = luci.sys.call(string.format([[uci set clash.config.tun_mode='1' && uci set clash.config.core=%q && uci set clash.config.stack='system' && uci set clash.config.enable_udp='1' && uci set clash.config.enhanced_mode='fake-ip' && uci commit clash]], preferred ~= "" and preferred or "3"))
+		local stack = (mode == "mixed") and "mixed" or "system"
+		rc = luci.sys.call(string.format(
+			[[uci set clash.config.tun_mode='1' && uci set clash.config.core=%q && uci set clash.config.stack=%q && uci set clash.config.enable_udp='1' && uci set clash.config.enhanced_mode='fake-ip' && uci commit clash]],
+			preferred ~= "" and preferred or "3", stack))
 	else
 		rc = luci.sys.call([[uci set clash.config.tun_mode='0' && uci set clash.config.enhanced_mode='fake-ip' && uci commit clash]])
 	end

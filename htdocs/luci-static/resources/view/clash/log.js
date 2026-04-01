@@ -26,7 +26,7 @@ return view.extend({
                     }
                 });
             }
-        }, [ '刷新' ]);
+        }, [ _('Refresh') ]);
 
         const clearBtn = E('button', {
             class: 'btn cbi-button cbi-button-negative',
@@ -35,7 +35,7 @@ return view.extend({
                 const el = document.getElementById('clash_log');
                 if (el) el.value = '';
             }
-        }, [ '清空' ]);
+        }, [ _('Clear') ]);
 
         /* 自动滚动到底部 */
         textarea.addEventListener('DOMNodeInserted', function () {
@@ -56,7 +56,7 @@ return view.extend({
         }, 5);
 
         return E([
-            E('h2', {}, [ 'Clash 日志' ]),
+            E('h2', {}, [ _('Clash Log') ]),
             E('div', { style: 'margin-bottom:8px;' }, [ refreshBtn, clearBtn ]),
             textarea
         ]);
