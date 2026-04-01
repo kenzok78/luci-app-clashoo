@@ -1,5 +1,5 @@
 {
-    "luci-app-clash": {
+    "luci-app-clashoo": {
         "description": "Grant access to Clash procedures",
         "read": {
             "uci": [ "clash" ],

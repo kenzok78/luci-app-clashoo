@@ -165,16 +165,17 @@ return view.extend({
         /* ─── 上传配置 ─── */
         s = m.section(form.NamedSection, 'config', 'clash', _('上传配置文件'));
         s.anonymous = false;
-        s.description = _('上传本地 .yaml / .yml 文件作为配置来源（存入 upload/ 目录）');
         s.render = function () {
             let input = E('input', {
                 type: 'file', accept: '.yaml,.yml',
-                id: 'cfg-upload-input'
+                id: 'cfg-upload-input',
+                style: 'flex:1;min-width:0'
             });
-            let status = E('span', { style: 'margin-left:8px;color:#666;font-size:.9rem' }, '');
+            let status = E('span', { style: 'margin-left:8px;color:#666;font-size:.9rem;white-space:nowrap' }, '');
             let btn = E('button', {
                 type: 'button',
-                class: 'btn cbi-button cbi-button-apply'
+                class: 'btn cbi-button cbi-button-apply',
+                style: 'margin-left:8px;white-space:nowrap;flex-shrink:0'
             }, _('上传'));
             btn.addEventListener('click', () => {
                 let files = input.files;
@@ -192,21 +193,12 @@ return view.extend({
                 };
                 reader.readAsArrayBuffer(file);
             });
-            /* Use same cbi-value row structure as form.Button so the button
-               sits in the value column and aligns with "下载订阅" above */
             let node = E('div', { class: 'cbi-section' }, [
                 E('h3', {}, _('上传配置文件')),
-                E('p', { class: 'cbi-value-description' }, _('上传本地 .yaml / .yml 文件作为配置来源（存入 upload/ 目录）')),
-                E('div', { class: 'cbi-section-node' }, [
-                    E('div', { class: 'cbi-value' }, [
-                        E('label', { class: 'cbi-value-title' }, ''),
-                        E('div', { class: 'cbi-value-field' }, [input])
-                    ]),
-                    E('div', { class: 'cbi-value' }, [
-                        E('label', { class: 'cbi-value-title' }, ''),
-                        E('div', { class: 'cbi-value-field' }, [btn, status])
-                    ])
-                ])
+                E('p', { class: 'cbi-value-description', style: 'margin-bottom:10px' },
+                    _('上传本地 .yaml / .yml 文件作为配置来源（存入 upload/ 目录）')),
+                E('div', { style: 'display:flex;align-items:center;gap:0;max-width:540px' },
+                    [input, btn, status])
             ]);
             return Promise.resolve(node);
         };
@@ -283,8 +275,14 @@ return view.extend({
         s.anonymous = false;
         s.render = function () {
             let node = E('div', { class: 'cbi-section' });
-            renderFileTable(_('上传配置文件'), uploadFiles, activeName, '2', node);
-            renderFileTable(_('自定义配置文件'), customFiles, activeName, '3', node);
+            if (!uploadFiles.length && !customFiles.length) {
+                node.appendChild(E('p', { style: 'color:#999;padding:8px 0' }, _('暂无配置文件')));
+                return Promise.resolve(node);
+            }
+            renderFileTable(_('已上传文件'), uploadFiles, activeName, '2', node);
+            if (uploadFiles.length && customFiles.length)
+                node.appendChild(E('hr', { style: 'border:none;border-top:1px solid #eee;margin:8px 0' }));
+            renderFileTable(_('自定义文件'), customFiles, activeName, '3', node);
             return Promise.resolve(node);
         };
 

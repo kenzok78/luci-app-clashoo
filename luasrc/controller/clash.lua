@@ -12,11 +12,11 @@ function index()
 	end
 
 	-- luci 24.10+ 通过 menu.d JSON 注册菜单
-	local has_menu_d = nixio.fs.access("/usr/share/luci/menu.d/luci-app-clash.json")
+	local has_menu_d = nixio.fs.access("/usr/share/luci/menu.d/luci-app-clashoo.json")
 	if not has_menu_d then
 		local page = entry({"admin", "services", "clash"}, alias("admin", "services", "clash", "overview"), "Clash", 1)
 		page.dependent = true
-		page.acl_depends = {"luci-app-clash"}
+		page.acl_depends = {"luci-app-clashoo"}
 
 		entry({"admin", "services", "clash", "overview"},    cbi("clash/overview"),          "概览",     10).leaf = true
 		entry({"admin", "services", "clash", "system"},      cbi("clash/system"),            "系统设置", 20).leaf = true

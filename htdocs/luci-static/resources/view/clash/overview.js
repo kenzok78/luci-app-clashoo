@@ -68,11 +68,12 @@ return view.extend({
             ]);
         }
 
+        let _uiLockUntil = 0;   /* 按钮点击后短暂禁止重渲染 */
+        let _isRunning   = false;
+
         /* ── structure ── */
         let node = E('div', {}, [
-            /* Hero + controls share the same centered wrapper */
             E('div', { class: 'cbi-section' }, [
-                /* Hero */
                 E('div', { style: 'text-align:center;padding:18px 0 14px' }, [
                     E('img', {
                         src: '/luci-static/clash/logo.png',
@@ -80,11 +81,11 @@ return view.extend({
                         onerror: "this.style.display='none'",
                         alt: 'Clash'
                     }),
-                    E('p', { id: 'ov-title', style: 'margin:0;font-weight:600;font-size:1.05rem;color:#333' }, 'Clash'),
-                    E('p', { style: 'margin:4px 0 0;font-size:.88rem;color:#888' }, '基于规则的自定义代理客户端')
+                    /* 标题 = 实时日志滚动区，运行时变绿 */
+                    E('p', { id: 'ov-title', style: 'margin:2px 0 0;font-weight:700;font-size:1.1rem;color:#aaa;letter-spacing:.02em;transition:color .4s' }, 'Clashoo'),
+                    E('p', { style: 'margin:3px 0 0;font-size:.82rem;color:#aaa' }, '基于规则的自定义代理客户端')
                 ]),
                 E('hr', { style: 'border:none;border-top:1px solid #eee;margin:8px 0 4px' }),
-                /* Control table — same section, same padding reference */
                 E('div', { class: 'cbi-section-node' }, [
                     E('table', { style: 'width:100%;border-collapse:collapse' }, [
                         mkRow('Clash 客户端',  'ov-client'),
@@ -98,9 +99,45 @@ return view.extend({
             ])
         ]);
 
+        /* ── 每秒轮询 clash_real.txt → 滚动显示在标题，稳定后变回 "Clash" ── */
+        let _lastRealLog  = '';
+        let _stableTicks  = 0;
+
+        poll.add(function () {
+            return clash.readRealLog().then(function (c) {
+                let title = document.getElementById('ov-title');
+                if (!title) return;
+                let text = (c || '').trim();
+
+                /* 规范化："Clash for OpenWRT" / "Clashoo" / "mihomo" → "Clashoo" */
+                text = text.replace(/Clash\s+for\s+OpenWRT/gi, 'Clashoo');
+                text = text.replace(/\bmihomo\b/gi, 'Clashoo');
+                text = text.replace(/\bClashoo\b/gi, 'Clashoo');
+                if (!text) text = 'Clashoo';
+
+                if (text === _lastRealLog) {
+                    _stableTicks++;
+                } else {
+                    _lastRealLog = text;
+                    _stableTicks = 0;
+                }
+
+                /* 文字是 "Clashoo" 或稳定3秒 → 显示 "Clashoo"，颜色跟运行状态 */
+                if (text === 'Clashoo' || _stableTicks >= 3) {
+                    title.textContent = 'Clashoo';
+                    title.style.color = _isRunning ? '#1f8b4c' : '#aaa';
+                } else {
+                    title.textContent = text;
+                    title.style.color = '#777';
+                }
+            });
+        }, 1);
+
         /* ── render dynamic ── */
         function update(s) {
             const running   = !!s.running;
+            _isRunning = running;
+            const locked    = Date.now() < _uiLockUntil;
             const configs   = cfgData.configs || [];
             const curConf   = cfgData.current || s.conf_path || '';
             const modeValue = s.mode_value  || 'fake-ip';
@@ -110,21 +147,23 @@ return view.extend({
             const dashPass  = s.dash_pass   || '';
             const localIp   = s.local_ip    || location.hostname;
             const dashOk    = !!s.dashboard_installed || !!s.yacd_installed;
-            const coreName  = (s.core_version || '').match(/^(\S+)/)?.[1] || 'Clash';
-
-            let title = document.getElementById('ov-title');
-            if (title) title.textContent = coreName;
 
             /* Client */
             let elClient = document.getElementById('ov-client');
-            if (elClient) {
+            if (elClient && !locked) {
                 elClient.innerHTML = '';
                 let grp = mkBtnGroup();
                 grp.appendChild(mkBtn(running ? '运行中' : '已停止',
                     running ? '#1f8b4c' : '#b58900', null));
                 grp.appendChild(running
-                    ? mkBtn('停止客户端', '#6c757d', () => clash.stop())
-                    : mkBtn('启用客户端', '#adb5bd', () => clash.start()));
+                    ? mkBtn('停止客户端', '#6c757d', () => {
+                        _uiLockUntil = Date.now() + 3000;
+                        clash.stop();
+                      })
+                    : mkBtn('启用客户端', '#4a76d4', () => {
+                        _uiLockUntil = Date.now() + 3000;
+                        clash.start();
+                      }));
                 elClient.appendChild(grp);
             }
 

@@ -36,7 +36,8 @@ return view.extend({
         o.value('', '（未设置）');
         o.default = '';
         for (const name of allConfigs) {
-            o.value(name, name);
+            const label = name.length > 28 ? name.slice(0, 25) + '…' : name;
+            o.value(name, label);
         }
         o.load = function () { return curConf || ''; };
         o.write = function () {};
@@ -82,11 +83,11 @@ return view.extend({
         o.description = 'TPROXY：需内核支持 IP_TRANSPARENT；TUN：与 TCP TUN 模式配合使用';
 
         o = s.option(form.ListValue, 'stack', '网络栈类型');
-        o.value('system', 'System（原生 TCP+UDP）');
-        o.value('gvisor', 'gVisor（沙箱隔离）');
-        o.value('mixed',  'Mixed（推荐：TCP=System, UDP=gVisor）');
+        o.value('system', 'System');
+        o.value('gvisor', 'gVisor');
+        o.value('mixed',  'Mixed（推荐）');
         o.default = 'mixed';
-        o.description = 'TUN 模式专用；请根据运行速度为 TUN 模式选择合适的网络栈';
+        o.description = 'TUN 模式专用：System=原生TCP+UDP；gVisor=沙箱隔离；Mixed=TCP用System，UDP用gVisor（推荐）';
         o.depends('tcp_mode', 'tun');
         o.depends('udp_mode', 'tun');
 

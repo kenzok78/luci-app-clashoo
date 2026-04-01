@@ -214,7 +214,7 @@ elif [ ! -f "$CONFIG_YAML_PATH" ] && [ ! -f "$CONFIG_YAML" ];then
 			echo "找不到配置文章" >$REAL_LOG
 		fi
 		sleep 5
-		echo "Clash for OpenWRT" >$REAL_LOG
+		echo "Clashoo" >$REAL_LOG
 		exit 0	
 	
 elif [ "$(ls -l $CONFIG_YAML_PATH|awk '{print int($5)}')" -eq 0 ] && [ "$(ls -l $CONFIG_YAML|awk '{print int($5)}')" -eq 0 ];then
@@ -225,7 +225,7 @@ elif [ "$(ls -l $CONFIG_YAML_PATH|awk '{print int($5)}')" -eq 0 ] && [ "$(ls -l 
 			 echo "你的config.yaml有问题还是为了空" >$REAL_LOG
 		fi
 		sleep 5
-		echo "Clash for OpenWRT" >$REAL_LOG
+		echo "Clashoo" >$REAL_LOG
 		exit 0	
 		
 fi
@@ -483,7 +483,7 @@ if [ "${enable}" -eq 1 ]; then
 	sleep 1
 	
 	if ! _require_runtime_network_stack; then
-		echo "Clash for OpenWRT" >$REAL_LOG
+		echo "Clashoo" >$REAL_LOG
 		exit 0
 	fi
 	
@@ -497,7 +497,7 @@ if [ "${core}" -eq 1 ] && [ ! -x "$CLASH" ]; then
 		echo "找不到可用的 Clash 内核: $CLASH" >> $REAL_LOG			
 	fi
 
-	echo "Clash for OpenWRT" >$REAL_LOG
+	echo "Clashoo" >$REAL_LOG
 	exit 0
 elif  [ "${core}" -eq 2 ] && [ ! -x "$CLASH" ]; then
 	if [ "${lang}" == "en" ] || [ $lang == "auto" ];then
@@ -508,7 +508,7 @@ elif  [ "${core}" -eq 2 ] && [ ! -x "$CLASH" ]; then
 		echo "找不到可用的 clash meta 内核: $CLASH" >> $REAL_LOG	
 	fi	
 	sleep 1
-	echo "Clash for OpenWRT" >$REAL_LOG
+	echo "Clashoo" >$REAL_LOG
 	exit 0
 elif  [ "${core}" -eq 3 ] && [ ! -x "$CLASH" ]; then
 	if [ "${lang}" == "en" ] || [ $lang == "auto" ];then
@@ -519,7 +519,7 @@ elif  [ "${core}" -eq 3 ] && [ ! -x "$CLASH" ]; then
 		echo "找不到可用的 mihomo 内核: $CLASH" >> $REAL_LOG
 	fi	
 	sleep 1
-	echo "Clash for OpenWRT" >$REAL_LOG
+	echo "Clashoo" >$REAL_LOG
 	exit 0
 else
 if  [  -f $CONFIG_YAML ] && [ "$(ls -l $CONFIG_YAML|awk '{print int($5)}')" -ne 0 ] ; then
@@ -558,7 +558,7 @@ if  [  -f $CONFIG_YAML ] && [ "$(ls -l $CONFIG_YAML|awk '{print int($5)}')" -ne 
 			fi
 			backend_remove_rules >/dev/null 2>&1
 			sleep 1
-			echo "Clash for OpenWRT" >$REAL_LOG
+			echo "Clashoo" >$REAL_LOG
 			exit 0
 		fi
 		core=$(uci get clash.config.core 2>/dev/null)
@@ -581,7 +581,7 @@ if  [  -f $CONFIG_YAML ] && [ "$(ls -l $CONFIG_YAML|awk '{print int($5)}')" -ne 
 			echo "找不到Country.mmdb" >$REAL_LOG
 		fi	
 		sleep 1
-		echo "Clash for OpenWRT" >$REAL_LOG		
+		echo "Clashoo" >$REAL_LOG		
 		exit 0
 	fi
 	
@@ -593,7 +593,7 @@ if  [  -f $CONFIG_YAML ] && [ "$(ls -l $CONFIG_YAML|awk '{print int($5)}')" -ne 
 		fi	
 		backend_remove_rules >/dev/null 2>&1
 		sleep 1
-		echo "Clash for OpenWRT" >$REAL_LOG		
+		echo "Clashoo" >$REAL_LOG		
 		exit 0
 	fi
         
@@ -641,13 +641,13 @@ if  [  -f $CONFIG_YAML ] && [ "$(ls -l $CONFIG_YAML|awk '{print int($5)}')" -ne 
 		sleep 1
 		echo "Clash is Running " >$REAL_LOG
 		sleep 1
-		echo "Clash for OpenWRT" >$REAL_LOG
+		echo "Clashoo" >$REAL_LOG
 	elif [ "${lang}" == "zh_cn" ];then
 		echo "Clash 启动成功，请等待服务器上线！" >$REAL_LOG
 		sleep 1
 		echo "Clash运行中" >$REAL_LOG
 		sleep 1
-		echo "Clash for OpenWRT" >$REAL_LOG
+		echo "Clashoo" >$REAL_LOG
 	fi
 	core_wait=0
 	while [ "$core_wait" -lt 8 ]; do
@@ -663,19 +663,19 @@ if  [  -f $CONFIG_YAML ] && [ "$(ls -l $CONFIG_YAML|awk '{print int($5)}')" -ne 
 		backend_remove_rules >/dev/null 2>&1
 		_kill_core
 		sleep 1
-		echo "Clash for OpenWRT" >$REAL_LOG
+		echo "Clashoo" >$REAL_LOG
 	fi
 else
 	if [ "${lang}" == "en" ] || [ $lang == "auto" ];then
 		echo "  $(date "+%Y-%m-%d %H:%M:%S") -  problem with config.yaml,  config.yaml is either empty or not found " >> /usr/share/clash/clash.txt
 		echo "  problem with config file " >$REAL_LOG 
 		sleep 1
-		echo "Clash for OpenWRT" >$REAL_LOG
+		echo "Clashoo" >$REAL_LOG
 	elif [ "${lang}" == "zh_cn" ];then
 		echo "  $(date "+%Y-%m-%d %H:%M:%S")  - 你的config.yaml有问题还是为了空 0kb " >> /usr/share/clash/clash.txt
 		echo "  你的config.yaml有问题还是为了空 0kb " >$REAL_LOG
 		sleep 1
-		echo "Clash for OpenWRT" >$REAL_LOG 
+		echo "Clashoo" >$REAL_LOG 
 	fi
 fi
 fi
@@ -684,12 +684,12 @@ else
 		echo "Enable Client and Start Client Again" >$REAL_LOG 
 		echo "  $(date "+%Y-%m-%d %H:%M:%S") - Enable Client and Start Client Again" >>/usr/share/clash/clash.txt
 		sleep 1
-		echo "Clash for OpenWRT" >$REAL_LOG
+		echo "Clashoo" >$REAL_LOG
 	elif [ "${lang}" == "zh_cn" ];then
     		echo "启用客户端并重新启动客户端" >$REAL_LOG
 		echo "  $(date "+%Y-%m-%d %H:%M:%S") - 启用客户端并重新启动客户端" >>/usr/share/clash/clash.txt
 		sleep 1
-		echo "Clash for OpenWRT" >$REAL_LOG
+		echo "Clashoo" >$REAL_LOG
 	fi
 fi
 #=========================================================================================================================== 
@@ -756,12 +756,12 @@ stop(){
 			echo "  $(date "+%Y-%m-%d %H:%M:%S") - CLIENT IS DISABLED " >> /usr/share/clash/clash.txt
 			echo "Client is Disabled " >$REAL_LOG
 			sleep 1
-			echo "Clash for OpenWRT" >$REAL_LOG
+			echo "Clashoo" >$REAL_LOG
 		elif [ "${lang}" == "zh_cn" ];then
 			echo "  $(date "+%Y-%m-%d %H:%M:%S")  - 客户端被禁用 " >> /usr/share/clash/clash.txt
 			echo "客户端被禁用 " >$REAL_LOG
 			sleep 1
-			echo "Clash for OpenWRT" >$REAL_LOG
+			echo "Clashoo" >$REAL_LOG
 		fi		
 	
 		if _core_running; then

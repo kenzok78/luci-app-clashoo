@@ -1,6 +1,6 @@
 {
   "admin/services/clash": {
-    "title": "Clash",
+    "title": "Clashoo",
     "order": 50,
     "action": { "type": "firstchild" },
     "icon": "/luci-static/clash/logo.png"

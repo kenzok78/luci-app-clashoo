@@ -16,6 +16,7 @@ const callSetProxy     = rpc.declare({ object: 'luci.clash', method: 'set_proxy_
 const callSetPanel     = rpc.declare({ object: 'luci.clash', method: 'set_panel',        params: ['name'],  expect: {} });
 const callUpdatePanel  = rpc.declare({ object: 'luci.clash', method: 'update_panel',     params: ['name'],  expect: {} });
 const callReadLog      = rpc.declare({ object: 'luci.clash', method: 'read_log',         expect: {} });
+const callReadRealLog  = rpc.declare({ object: 'luci.clash', method: 'read_real_log',    expect: {} });
 const callClearLog     = rpc.declare({ object: 'luci.clash', method: 'clear_log',        expect: {} });
 const callReadUpdLog   = rpc.declare({ object: 'luci.clash', method: 'read_update_log',  expect: {} });
 const callClearUpdLog  = rpc.declare({ object: 'luci.clash', method: 'clear_update_log', expect: {} });
@@ -44,6 +45,7 @@ return baseclass.extend({
     updatePanel:  function (name) { return L.resolveDefault(callUpdatePanel(name || 'metacubexd'), {}); },
 
     readLog:       function () { return L.resolveDefault(callReadLog(),     { content: '' }).then(r => r.content || ''); },
+    readRealLog:   function () { return L.resolveDefault(callReadRealLog(), { content: '' }).then(r => r.content || ''); },
     clearLog:      function () { return L.resolveDefault(callClearLog(), {}); },
     readUpdateLog: function () { return L.resolveDefault(callReadUpdLog(),  { content: '' }).then(r => r.content || ''); },
     clearUpdateLog:function () { return L.resolveDefault(callClearUpdLog(), {}); },

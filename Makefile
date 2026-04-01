@@ -1,6 +1,6 @@
 include $(TOPDIR)/rules.mk 
 
-PKG_NAME:=luci-app-clash
+PKG_NAME:=luci-app-clashoo
 PKG_VERSION:=v1.9.0
 PKG_MAINTAINER:=frainzy1477
 
@@ -131,7 +131,7 @@ define Package/$(PKG_NAME)/install
 	$(INSTALL_CONF) ./root/etc/clash/Country.mmdb $(1)/etc/clash
 	$(INSTALL_BIN) ./root/usr/share/clash/create/* $(1)/usr/share/clash/create
 	$(INSTALL_BIN) ./root/usr/share/clash/*.sh $(1)/usr/share/clash
-	$(INSTALL_BIN) ./root/usr/share/rpcd/acl.d/luci-app-clash.json $(1)/usr/share/rpcd/acl.d
+	$(INSTALL_BIN) ./root/usr/share/rpcd/acl.d/luci-app-clashoo.json $(1)/usr/share/rpcd/acl.d
 	
 	$(INSTALL_BIN) ./root/usr/share/clash/luci_version $(1)/usr/share/clash
 	$(INSTALL_BIN) ./root/usr/share/clash/rule.yaml $(1)/usr/share/clash
@@ -176,8 +176,8 @@ endef
 define Package/luci-i18n-clash-zh-cn
 	SECTION:=luci
 	CATEGORY:=LuCI
-	TITLE:=luci-app-clash - Simplified Chinese (zh-cn)
-	DEPENDS:=+luci-app-clash
+	TITLE:=luci-app-clashoo - Simplified Chinese (zh-cn)
+	DEPENDS:=+luci-app-clashoo
 	PKGARCH:=all
 endef
 

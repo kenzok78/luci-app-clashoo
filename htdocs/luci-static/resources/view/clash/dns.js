@@ -47,19 +47,6 @@ return view.extend({
         o = s.option(form.Flag, 'dnsforwader', _('强制转发 DNS'));
         o.default = '0';
 
-        o = s.option(form.Flag, 'dnscache', _('启用 DNS 缓存'));
-        o.default = '1';
-
-        o = s.option(form.Value, 'dns_nameserver', _('上游 Nameserver'), _('换行分隔，支持 DNS/DoH/DoT'));
-        o.rows = 4;
-        o.optional = true;
-        o.default = 'https://doh.pub/dns-query\nhttps://dns.alidns.com/dns-query\n223.5.5.5\n119.29.29.29';
-
-        o = s.option(form.Value, 'dns_fallback', _('Fallback DNS'), _('用于境外域名解析，换行分隔'));
-        o.rows = 4;
-        o.optional = true;
-        o.default = 'https://dns.cloudflare.com/dns-query\nhttps://dns.google/dns-query\n8.8.8.8\n1.1.1.1';
-
         o = s.option(form.DynamicList, 'dns_fake_ip_filter', _('Fake-IP 过滤域名'), _('匹配的域名返回真实 IP，不走 Fake-IP'));
         o.rmempty = true;
         o.default = ['*.lan', '*.local', 'localhost.ptlogin2.qq.com', '+.stun.*.*', '+.stun.*.*.*', 'time.windows.com', 'time.nist.gov', 'time.apple.com'];

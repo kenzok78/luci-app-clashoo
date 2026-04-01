@@ -47,9 +47,10 @@ return c.get(pkg, sec, opt) || '';
 }
 
 function is_running() {
-return system('pgrep -x mihomo >/dev/null 2>&1') == 0 ||
-       system('pgrep -x clash-meta >/dev/null 2>&1') == 0 ||
-       system('pgrep -x clash >/dev/null 2>&1') == 0;
+let p = popen("for f in /proc/[0-9]*/exe; do readlink \"$f\" 2>/dev/null; done | grep -qE '/mihomo$|/clash-meta$|/clash$'; echo $?");
+if (!p) return false;
+let r = trim(p.read('all')); p.close();
+return r === '0';
 }
 
 function get_local_ip() {
@@ -347,6 +348,12 @@ return { profiles: get_profiles() };
 read_log: {
 call: function() {
 return { content: get_log_content() };
+}
+},
+
+read_real_log: {
+call: function() {
+return { content: trim(readfile('/usr/share/clash/clash_real.txt') || '') };
 }
 },
 
