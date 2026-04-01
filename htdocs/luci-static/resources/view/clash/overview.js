@@ -61,10 +61,10 @@ return view.extend({
         /* ── Static structure ── */
         let node = E('div', { style: 'width:100%' }, [
             /* Hero */
-            E('div', { style: 'text-align:center;padding:22px 0 18px' }, [
+            E('div', { style: 'text-align:center;padding:18px 0 14px' }, [
                 E('img', {
                     src: '/luci-static/clash/logo.png',
-                    style: 'width:60px;height:60px;object-fit:contain',
+                    style: 'width:56px;height:56px;object-fit:contain;display:block;margin:0 auto',
                     onerror: "this.style.display='none'",
                     alt: ''
                 }),

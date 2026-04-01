@@ -2,96 +2,23 @@
 'require form';
 'require view';
 'require uci';
-'require poll';
 'require tools.clash as clash';
-
-function renderStatus(running) {
-    return updateStatus(
-        E('input', { id: 'core_status', style: 'border:unset;font-style:italic;font-weight:bold;', readonly: '' }),
-        running
-    );
-}
-
-function updateStatus(element, running) {
-    if (element) {
-        element.style.color = running ? 'green' : 'red';
-        element.value = running ? '运行中' : '未运行';
-    }
-    return element;
-}
 
 return view.extend({
     load: function () {
         return Promise.all([
             uci.load('clash'),
-            clash.version(),
-            clash.status(),
-            clash.capabilities(),
             clash.listConfigs()
         ]);
     },
 
     render: function (data) {
-        const appVersion  = data[1].app    || '';
-        const coreVersion = data[1].core   || '';
-        const binary      = data[1].binary || '';
-        const running     = data[2];
-        const caps        = data[3] || {};
-        const backend     = caps.backend || '未知';
-        const missing     = caps.missing_fw4_tools || [];
-        const allConfigs  = (data[4] && data[4].configs) || [];
-        const curConf     = (data[4] && data[4].current) || '';
+        const allConfigs  = (data[1] && data[1].configs) || [];
+        const curConf     = (data[1] && data[1].current) || '';
 
         let m, s, o;
 
         m = new form.Map('clash', '代理配置', '');
-
-        if (missing.length) {
-            m.description = '当前运行环境缺少 fw4/nft 所需命令：' + missing.join(', ') + '。请先补齐防火墙运行依赖，再启用透明代理。';
-        }
-
-        /* ── 状态栏 ── */
-        s = m.section(form.TableSection, 'status', '状态');
-        s.anonymous = true;
-
-        o = s.option(form.Value, '_app_version', '插件版本');
-        o.readonly = true;
-        o.load = function () { return appVersion || '未知'; };
-        o.write = function () {};
-
-        o = s.option(form.Value, '_core_version', '内核版本');
-        o.readonly = true;
-        o.load = function () { return coreVersion || '未安装'; };
-        o.write = function () {};
-
-        o = s.option(form.Value, '_binary', '二进制文件');
-        o.readonly = true;
-        o.load = function () { return binary || '未找到'; };
-        o.write = function () {};
-
-        o = s.option(form.Value, '_backend', '防火墙后端');
-        o.readonly = true;
-        o.load = function () { return backend; };
-        o.write = function () {};
-
-        o = s.option(form.DummyValue, '_core_status', '运行状态');
-        o.cfgvalue = function () { return renderStatus(running); };
-
-        poll.add(function () {
-            return L.resolveDefault(clash.status()).then(
-                updateStatus.bind(null, document.getElementById('core_status'))
-            );
-        });
-
-        o = s.option(form.Button, 'reload');
-        o.inputstyle = 'action';
-        o.inputtitle = '重载服务';
-        o.onclick = function () { return clash.reload(); };
-
-        o = s.option(form.Button, 'restart');
-        o.inputstyle = 'negative';
-        o.inputtitle = '重启服务';
-        o.onclick = function () { return clash.restart(); };
 
         /* ── 基本配置 ── */
         s = m.section(form.NamedSection, 'config', 'clash', '基本配置');
@@ -249,7 +176,8 @@ return view.extend({
 
         return m.render().then(function(node) {
             let style = E('style', {}, [
-                '.cbi-input-select, .cbi-input-text { width: 100% !important; max-width: 460px !important; box-sizing: border-box !important; }'
+                '.cbi-section .cbi-input-select { width: 100% !important; max-width: 100% !important; box-sizing: border-box !important; }',
+                '.cbi-section .cbi-input-text { width: 100% !important; max-width: 100% !important; box-sizing: border-box !important; }'
             ]);
             node.insertBefore(style, node.firstChild);
             return node;
