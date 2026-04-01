@@ -222,58 +222,63 @@ return view.extend({
         o.placeholder = '9090';
         o.description = 'RESTful API 及 Web 面板监听端口（mihomo: external-controller）';
 
-        o = s.option(form.Value, 'ui_path', _('UI 路径'));
+        o = s.option(form.Value, 'ui_path', _('面板存储目录'));
         o.placeholder = 'ui';
-        o.description = _('面板文件存放路径（相对于配置目录）');
+        o.description = _('面板静态文件的存放目录（相对于配置目录，如：ui）');
         o.rmempty = true;
 
-        o = s.option(form.Value, 'ui_name', _('UI 名称'));
-        o.placeholder = _('不修改');
+        o = s.option(form.Value, 'ui_name', _('面板标识名'));
+        o.placeholder = _('留空自动检测');
+        o.description = _('对应 external-ui-name，用于指定加载哪个子目录的面板');
         o.rmempty = true;
 
-        o = s.option(form.ListValue, 'ui_url', _('UI 下载地址'));
+        o = s.option(form.ListValue, 'ui_url', _('面板下载源'));
         o.optional = true;
         o.rmempty = true;
-        o.value('', _('不修改'));
+        o.value('', _('不下载'));
         o.value('https://github.com/Zephyruso/zashboard/releases/latest/download/dist-cdn-fonts.zip', 'Zashboard (CDN Fonts)');
         o.value('https://github.com/Zephyruso/zashboard/releases/latest/download/dist.zip', 'Zashboard');
         o.value('https://github.com/MetaCubeX/metacubexd/archive/refs/heads/gh-pages.zip', 'MetaCubeXD');
         o.value('https://github.com/MetaCubeX/Yacd-meta/archive/refs/heads/gh-pages.zip', 'YACD');
         o.value('https://github.com/MetaCubeX/Razord-meta/archive/refs/heads/gh-pages.zip', 'Razord');
+        o.description = _('选择要下载安装的 Web 面板包');
 
-        o = s.option(form.Value, 'api_listen', _('API 监听'));
+        o = s.option(form.Value, 'api_listen', _('控制器监听地址'));
         o.placeholder = '[::]:9090';
         o.rmempty = true;
-        o.description = _('指定 API 完整监听地址（留空则使用面板端口）');
+        o.description = _('完整格式：[::]:9090（覆盖面板端口设置，留空使用面板端口）');
 
-        o = s.option(form.Value, 'api_tls_listen', _('API TLS 监听地址'));
+        o = s.option(form.Value, 'api_tls_listen', _('TLS 加密监听地址'));
         o.placeholder = '[::]:9443';
         o.rmempty = true;
+        o.description = _('启用 HTTPS 访问控制器时的监听地址');
 
-        o = s.option(form.Value, 'api_tls_cert', _('API TLS 证书路径'));
-        o.placeholder = _('不修改');
+        o = s.option(form.Value, 'api_tls_cert', _('TLS 证书路径'));
+        o.placeholder = _('如：/etc/clash/cert.pem');
         o.rmempty = true;
 
-        o = s.option(form.Value, 'api_tls_key', _('API TLS 密钥路径'));
-        o.placeholder = _('不修改');
+        o = s.option(form.Value, 'api_tls_key', _('TLS 私钥路径'));
+        o.placeholder = _('如：/etc/clash/key.pem');
         o.rmempty = true;
 
-        o = s.option(form.Value, 'api_tls_ech_key', _('API TLS ECH 密钥'));
-        o.placeholder = _('不修改');
+        o = s.option(form.Value, 'api_tls_ech_key', _('TLS ECH 密钥路径'));
+        o.placeholder = _('如：/etc/clash/ech.pem');
         o.rmempty = true;
+        o.description = _('Encrypted Client Hello 密钥文件路径（可选）');
 
-        o = s.option(form.Value, 'api_secret', _('API 密钥'));
+        o = s.option(form.Value, 'api_secret', _('访问鉴权密钥'));
         o.password = true;
-        o.placeholder = '••••••';
+        o.placeholder = _('留空不鉴权');
         o.rmempty = true;
-        o.description = _('访问 RESTful API 所需密钥（留空不设置）');
+        o.description = _('访问 RESTful API 及面板所需的 Bearer Token，留空则无需鉴权');
 
-        o = s.option(form.ListValue, 'selection_cache', _('保存节点/策略组选择'));
+        o = s.option(form.ListValue, 'selection_cache', _('记忆代理节点选择'));
         o.optional = true;
         o.value('', _('不修改'));
         o.value('0', _('禁用'));
         o.value('1', _('启用'));
         o.default = '1';
+        o.description = _('重启后保留上次选择的代理节点与策略组');
 
         /* ─── 已上传文件列表 ─── */
         let uploadFiles = uploadData.files || [];
