@@ -175,7 +175,8 @@ return view.extend({
             let status = E('span', { style: 'margin-left:8px;color:#666;font-size:.9rem' }, '');
             let btn = E('button', {
                 type: 'button',
-                style: 'display:inline-block;padding:.45rem 1.4rem;background:#4c6ef5;color:#fff;border:none;border-radius:.375rem;cursor:pointer;font-size:.95rem'
+                class: 'btn cbi-button cbi-button-apply',
+                style: 'margin-top:4px'
             }, _('上传'));
             btn.addEventListener('click', () => {
                 let files = input.files;

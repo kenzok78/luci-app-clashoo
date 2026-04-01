@@ -119,25 +119,30 @@ return view.extend({
         s = m.section(form.NamedSection, 'config', 'clash', '端口配置');
 
         o = s.option(form.Flag, 'allow_lan', '允许局域网连接');
+        o.default = '1';
         o.rmempty = false;
 
         o = s.option(form.Value, 'http_port', 'HTTP 代理端口');
         o.datatype    = 'port';
+        o.default     = '8080';
         o.placeholder = '8080';
         o.description = 'HTTP/HTTPS 代理端口（mihomo: port）';
 
         o = s.option(form.Value, 'socks_port', 'SOCKS5 代理端口');
         o.datatype    = 'port';
+        o.default     = '1080';
         o.placeholder = '1080';
         o.description = 'SOCKS5 代理端口（mihomo: socks-port）';
 
         o = s.option(form.Value, 'mixed_port', '混合端口（HTTPS + SOCKS5）');
         o.datatype    = 'port';
+        o.default     = '7890';
         o.placeholder = '7890';
         o.description = 'HTTP 与 SOCKS5 共用端口（mihomo: mixed-port）';
 
         o = s.option(form.Value, 'redir_port', 'Redirect 端口');
         o.datatype    = 'port';
+        o.default     = '7891';
         o.placeholder = '7891';
         o.description = 'TCP Redirect 模式监听端口（mihomo: redir-port）';
 
@@ -148,6 +153,7 @@ return view.extend({
 
         o = s.option(form.Value, 'dash_port', '外部控制端口（面板）');
         o.datatype    = 'port';
+        o.default     = '9090';
         o.placeholder = '9090';
         o.description = 'RESTful API 及 Web 面板监听端口（mihomo: external-controller）';
 
