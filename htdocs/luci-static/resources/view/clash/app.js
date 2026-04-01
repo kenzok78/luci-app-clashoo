@@ -34,6 +34,7 @@ return view.extend({
 
         o = s.option(form.ListValue, '_active_config', '配置文件');
         o.value('', '（未设置）');
+        o.default = '';
         for (const name of allConfigs) {
             o.value(name, name);
         }
