@@ -57,14 +57,14 @@ return view.extend({
 
         function mkBtnGroup() {
             return E('div', {
-                style: 'display:flex;flex-wrap:wrap;gap:6px;align-items:center'
+                style: 'display:inline-flex;gap:6px;align-items:center'
             });
         }
 
         function mkRow(label, tdId) {
             return E('tr', {}, [
-                E('td', { style: 'width:45%;padding:8px 12px;color:#555;font-size:.95rem;vertical-align:middle' }, label),
-                E('td', { id: tdId, style: 'padding:6px 12px;vertical-align:middle' })
+                E('td', { style: 'width:40%;padding:8px 12px;color:#555;font-size:.95rem;vertical-align:middle' }, label),
+                E('td', { id: tdId, style: 'padding:6px 12px;vertical-align:middle;text-align:center' })
             ]);
         }
 
@@ -85,7 +85,7 @@ return view.extend({
             /* Control table */
             E('div', { class: 'cbi-section' }, [
                 E('div', { class: 'cbi-section-node' }, [
-                    E('table', { style: 'width:100%;max-width:680px;margin:0 auto;border-collapse:collapse' }, [
+                    E('table', { style: 'width:100%;border-collapse:collapse' }, [
                         mkRow('Clash 客户端',  'ov-client'),
                         mkRow('Clash 模式',    'ov-mode'),
                         mkRow('Clash 配置',    'ov-config'),
