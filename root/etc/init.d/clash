@@ -108,6 +108,15 @@ _log_runtime_error() {
 	echo "  $(date "+%Y-%m-%d %H:%M:%S") - $message" >> /usr/share/clash/clash.txt
 }
 
+log_msg() {
+	local en_msg="$1" zh_msg="$2"
+	if [ "${lang}" = "en" ] || [ "${lang}" = "auto" ]; then
+		echo "$en_msg" > "$REAL_LOG"
+	elif [ "${lang}" = "zh_cn" ]; then
+		echo "$zh_msg" > "$REAL_LOG"
+	fi
+}
+
 _require_runtime_network_stack() {
 	local missing=""
 
@@ -196,11 +205,7 @@ del_cron(){
 select_config(){
 #=========================================================================================================================== 
 config_type=$(uci get clash.config.config_type 2>/dev/null)
-if [ "${lang}" == "en" ] || [ $lang == "auto" ];then
-	echo "Checking Config file" >$REAL_LOG 
-elif [ "${lang}" == "zh_cn" ];then
-	echo "正在检查配置文件" >$REAL_LOG
-fi
+log_msg "Checking Config file" "正在检查配置文件"
 
 if [ -f "$CONFIG_YAML_PATH" ] && [ -s "$CONFIG_YAML_PATH" ];then
 
@@ -208,22 +213,14 @@ if [ -f "$CONFIG_YAML_PATH" ] && [ -s "$CONFIG_YAML_PATH" ];then
 	
 elif [ ! -f "$CONFIG_YAML_PATH" ] && [ ! -f "$CONFIG_YAML" ];then
 
-		if [ "${lang}" == "en" ] || [ $lang == "auto" ];then
-			echo "No config found" >$REAL_LOG 
-		elif [ "${lang}" == "zh_cn" ];then
-			echo "找不到配置文章" >$REAL_LOG
-		fi
+		log_msg "No config found" "找不到配置文章"
 		sleep 5
 		echo "Clashoo" >$REAL_LOG
 		exit 0	
 	
 elif [ ! -s "$CONFIG_YAML_PATH" ] && [ ! -s "$CONFIG_YAML" ];then
 
-		if [ "${lang}" == "en" ] || [ $lang == "auto" ];then
-			echo "Your Config File is Empty" >$REAL_LOG 
-		elif [ "${lang}" == "zh_cn" ];then
-			 echo "你的config.yaml有问题还是为了空" >$REAL_LOG
-		fi
+		log_msg "Your Config File is Empty" "你的config.yaml有问题还是为了空"
 		sleep 5
 		echo "Clashoo" >$REAL_LOG
 		exit 0	
@@ -373,11 +370,7 @@ yml_dns_change(){
 	if [ "${dnsforwader:-0}" -ne 0 ]; then	
 	   if [ "${dns_port:-0}" -eq 53 ]; then
 	   
-			if [ "${lang}" == "en" ] || [ $lang == "auto" ];then
-				echo "Setting dns forwarder" >$REAL_LOG 
-			elif [ "${lang}" == "zh_cn" ];then
-				echo "设置dns转发器" >$REAL_LOG
-			fi
+			log_msg "Setting dns forwarder" "设置dns转发器"
 
 			  uci del_list dhcp.@dnsmasq[0].server=127.0.0.1# >/dev/null 2>&1
 			  uci del_list dhcp.@dnsmasq[0].server=127.0.0.1#$dns_port >/dev/null 2>&1
@@ -386,11 +379,7 @@ yml_dns_change(){
 	          uci set dhcp.@dnsmasq[0].noresolv=1
 			  uci commit dhcp
 		  if [ "${dnscache:-0}" -eq 0 ];then
-			if [ "${lang}" == "en" ] || [ $lang == "auto" ];then
-				echo "Disabling dns cache" >$REAL_LOG 
-			elif [ "${lang}" == "zh_cn" ];then
-				echo "禁用dns缓存" >$REAL_LOG
-			fi
+			log_msg "Disabling dns cache" "禁用dns缓存"
 			uci set dhcp.@dnsmasq[0].cachesize=0
 			uci commit dhcp
 		  fi  
@@ -403,11 +392,7 @@ yml_dns_change(){
 	          uci set dhcp.@dnsmasq[0].noresolv=1
 			  uci commit dhcp
 		  if [ "${dnscache:-0}"  -eq 0 ];then
-			if [ "${lang}" == "en" ] || [ $lang == "auto" ];then
-				echo "Disabling dns cache" >$REAL_LOG 
-			elif [ "${lang}" == "zh_cn" ];then
-				echo "禁用dns缓存" >$REAL_LOG
-			fi
+			log_msg "Disabling dns cache" "禁用dns缓存"
 
 	        uci set dhcp.@dnsmasq[0].cachesize=0
 			uci commit dhcp
@@ -415,11 +400,7 @@ yml_dns_change(){
 	   fi
 	elif [ "${dnsforwader:-0}" -ne 1 ]; then
 		if [ "${dnscache:-0}"  -eq 0 ];then
-			if [ "${lang}" == "en" ] || [ $lang == "auto" ];then
-				echo "Disabling dns cache" >$REAL_LOG 
-			elif [ "${lang}" == "zh_cn" ];then
-				echo "禁用dns缓存" >$REAL_LOG
-			fi
+			log_msg "Disabling dns cache" "禁用dns缓存"
 
 	        uci set dhcp.@dnsmasq[0].cachesize=0
 			uci commit dhcp
@@ -458,6 +439,147 @@ restore() {
 
 
 
+
+_start_validate_core() {
+	if [ "${core:-0}" -eq 1 ] && [ ! -x "$CLASH" ]; then
+		if [ "${lang}" = "en" ] || [ "${lang}" = "auto" ]; then
+			echo "  $(date "+%Y-%m-%d %H:%M:%S") - mihomo core not found, detected binary is unavailable: $CLASH" >> /usr/share/clash/clash.txt
+		elif [ "${lang}" = "zh_cn" ]; then
+			echo "  $(date "+%Y-%m-%d %H:%M:%S")  - 找不到可用的 mihomo 内核: $CLASH" >> /usr/share/clash/clash.txt
+		fi
+		log_msg "mihomo core not found, detected binary is unavailable: $CLASH" "找不到可用的 mihomo 内核: $CLASH"
+		echo "Clashoo" > "$REAL_LOG"
+		return 1
+	elif [ "${core:-0}" -eq 2 ] && [ ! -x "$CLASH" ]; then
+		if [ "${lang}" = "en" ] || [ "${lang}" = "auto" ]; then
+			echo "  $(date "+%Y-%m-%d %H:%M:%S") - mihomo core not found, detected binary is unavailable: $CLASH" >> /usr/share/clash/clash.txt
+		elif [ "${lang}" = "zh_cn" ]; then
+			echo "  $(date "+%Y-%m-%d %H:%M:%S")  - 找不到可用的 mihomo 内核: $CLASH" >> /usr/share/clash/clash.txt
+		fi
+		log_msg "mihomo core not found, detected binary is unavailable: $CLASH" "找不到可用的 mihomo 内核: $CLASH"
+		sleep 1
+		echo "Clashoo" > "$REAL_LOG"
+		return 1
+	elif [ "${core:-0}" -eq 3 ] && [ ! -x "$CLASH" ]; then
+		if [ "${lang}" = "en" ] || [ "${lang}" = "auto" ]; then
+			echo "  $(date "+%Y-%m-%d %H:%M:%S") - mihomo core not found, detected binary is unavailable: $CLASH" >> /usr/share/clash/clash.txt
+		elif [ "${lang}" = "zh_cn" ]; then
+			echo "  $(date "+%Y-%m-%d %H:%M:%S")  - 找不到可用的 mihomo 内核: $CLASH" >> /usr/share/clash/clash.txt
+		fi
+		log_msg "mihomo core not found, detected binary is unavailable: $CLASH" "找不到可用的 mihomo 内核: $CLASH"
+		sleep 1
+		echo "Clashoo" > "$REAL_LOG"
+		return 1
+	fi
+	return 0
+}
+
+_start_prepare_config() {
+	check >/dev/null 2>&1
+
+	custom_list >/dev/null 2>&1
+
+	sleep 1
+
+	enable_dns=$(uci get clash.config.enable_dns 2>/dev/null)
+
+	if [ -z "$(grep "^ {0,}listen:" /etc/clash/config.yaml)" ] || [ -z "$(grep "^ {0,}enhanced-mode:" /etc/clash/config.yaml)" ] || [ -z "$(grep "^ {0,}dns:" /etc/clash/config.yaml)" ];then
+
+	if [ "${enable_dns:-0}" -eq 0 ];then
+			uci set clash.config.enable_dns="1" && uci commit clash
+			log_msg "Enabling Custom Dns" "启用自定义DNS"
+	fi
+
+	fi
+
+	if { egrep -q '^ {0,}rule-providers:' "/etc/clash/config.yaml" || egrep -q '^ {0,}script:' "/etc/clash/config.yaml"; } && ! core_supports_advanced_features; then
+		if [ -x /usr/bin/mihomo ]; then
+			uci set clash.config.core="3" && uci commit clash
+		elif [ -x /usr/bin/clash-meta ] || [ -x /etc/clash/clash-meta ]; then
+			uci set clash.config.core="2" && uci commit clash
+		else
+			log_msg "Current config requires mihomo/clash-meta core" "当前配置需要 mihomo 或 clash-meta 内核"
+			backend_remove_rules >/dev/null 2>&1
+			sleep 1
+			echo "Clashoo" > "$REAL_LOG"
+			exit 0
+		fi
+		core=$(uci get clash.config.core 2>/dev/null)
+		CLASH="$(_detect_selected_core)"
+		sleep 1
+	fi
+
+	if [ "$(uci get clash.config.p_mode 2>/dev/null)" = "script" ]; then
+		uci set clash.config.p_mode="rule" && uci commit clash
+	fi
+
+	sleep 1
+	yml_change >/dev/null 2>&1
+
+	if [ ! -f /etc/clash/Country.mmdb ];then
+		log_msg "Cannot find Country.mmdb" "找不到Country.mmdb"
+		sleep 1
+		echo "Clashoo" > "$REAL_LOG"
+		exit 0
+	fi
+
+	if [ ! -f /etc/clash/config.yaml ];then
+		log_msg "Cannot find config.yaml" "找不到config.yaml"
+		backend_remove_rules >/dev/null 2>&1
+		sleep 1
+		echo "Clashoo" > "$REAL_LOG"
+		exit 0
+	fi
+
+	yml_dns_change >/dev/null 2>&1
+
+	ip_rules >/dev/null 2>&1
+}
+
+_start_launch_core() {
+	nohup "$CLASH" -d "$CLASH_CONFIG" > /usr/share/clash/clash.txt 2>&1 &
+	log_msg "mihomo Core Started Successfully " "mihomo 计划任务,启动进程守护程序..."
+	sleep 1
+	ln -s /usr/share/clash/yacd /www/luci-static/yacd 2>/dev/null
+
+	log_msg "Setting up mihomo $(backend_name) rules" "设置 mihomo 网络规则"
+	sleep 1
+
+	backend_apply_rules >/dev/null 2>&1
+
+	log_msg "Restarting Dnsmasq " "重启 Dnsmasq 程序"
+	sleep 1
+
+	/etc/init.d/dnsmasq restart >/dev/null 2>&1
+
+	restore >/dev/null 2>&1
+
+	log_msg "Setting Cron Job" "设置Cron"
+	add_cron
+	sleep 1
+	log_msg "mihomo Started Successfully " "mihomo 启动成功，请等待服务器上线！"
+	sleep 1
+	log_msg "mihomo is Running " "mihomo 运行中"
+	sleep 1
+	echo "Clashoo" > "$REAL_LOG"
+	core_wait=0
+	while [ "$core_wait" -lt 8 ]; do
+		if _core_running; then
+			break
+		fi
+		sleep 1
+		core_wait=$((core_wait + 1))
+	done
+
+	if ! _core_running; then
+		echo "  $(date "+%Y-%m-%d %H:%M:%S") - clash core failed to stay running after start" >> /usr/share/clash/clash.txt
+		backend_remove_rules >/dev/null 2>&1
+		_kill_core
+		sleep 1
+		echo "Clashoo" > "$REAL_LOG"
+	fi
+}
+
 start(){
 #=========================================================================================================================== 
 lang=$(uci get luci.main.lang 2>/dev/null)
@@ -473,228 +595,47 @@ if [ -f /etc/clash/config.yaml ];then
 fi
 
 if [ "${enable:-0}" -eq 1 ]; then
- 	if [ "${lang}" == "en" ] || [ $lang == "auto" ];then
-		echo "Starting Client" >$REAL_LOG 
-	elif [ "${lang}" == "zh_cn" ];then
-    	 echo "启动客户端" >$REAL_LOG
-	fi	
+ 	log_msg "Starting Client" "启动客户端"
 	sleep 1
 	select_config >/dev/null 2>&1
 	sleep 1
 	
 	if ! _require_runtime_network_stack; then
-		echo "Clashoo" >$REAL_LOG
+		echo "Clashoo" > "$REAL_LOG"
 		exit 0
 	fi
 	
 
-if [ "${core:-0}" -eq 1 ] && [ ! -x "$CLASH" ]; then
-	if [ "${lang}" == "en" ] || [ $lang == "auto" ];then
-		echo "  $(date "+%Y-%m-%d %H:%M:%S") - mihomo core not found, detected binary is unavailable: $CLASH" >> /usr/share/clash/clash.txt
-		echo "mihomo core not found, detected binary is unavailable: $CLASH" >> $REAL_LOG
-	elif [ "${lang}" == "zh_cn" ];then
-		echo "  $(date "+%Y-%m-%d %H:%M:%S")  - 找不到可用的 mihomo 内核: $CLASH" >> /usr/share/clash/clash.txt
-		echo "找不到可用的 mihomo 内核: $CLASH" >> $REAL_LOG			
-	fi
+if ! _start_validate_core; then
+	return
+fi
 
-	echo "Clashoo" >$REAL_LOG
-	exit 0
-elif  [ "${core:-0}" -eq 2 ] && [ ! -x "$CLASH" ]; then
-	if [ "${lang}" == "en" ] || [ $lang == "auto" ];then
-		echo "  $(date "+%Y-%m-%d %H:%M:%S") - mihomo core not found, detected binary is unavailable: $CLASH" >> /usr/share/clash/clash.txt
-		echo "mihomo core not found, detected binary is unavailable: $CLASH" >> $REAL_LOG
-	elif [ "${lang}" == "zh_cn" ];then
-		echo "  $(date "+%Y-%m-%d %H:%M:%S")  - 找不到可用的 mihomo 内核: $CLASH" >> /usr/share/clash/clash.txt
-		echo "找不到可用的 mihomo 内核: $CLASH" >> $REAL_LOG	
-	fi	
-	sleep 1
-	echo "Clashoo" >$REAL_LOG
-	exit 0
-elif  [ "${core:-0}" -eq 3 ] && [ ! -x "$CLASH" ]; then
-	if [ "${lang}" == "en" ] || [ $lang == "auto" ];then
-		echo "  $(date "+%Y-%m-%d %H:%M:%S") - mihomo core not found, detected binary is unavailable: $CLASH" >> /usr/share/clash/clash.txt
-		echo "mihomo core not found, detected binary is unavailable: $CLASH" >> $REAL_LOG
-	elif [ "${lang}" == "zh_cn" ];then
-		echo "  $(date "+%Y-%m-%d %H:%M:%S")  - 找不到可用的 mihomo 内核: $CLASH" >> /usr/share/clash/clash.txt
-		echo "找不到可用的 mihomo 内核: $CLASH" >> $REAL_LOG
-	fi	
-	sleep 1
-	echo "Clashoo" >$REAL_LOG
-	exit 0
-else
 if [ -f "$CONFIG_YAML" ] && [ -s "$CONFIG_YAML" ] ; then
 
-	check >/dev/null 2>&1
+	_start_prepare_config
 
-	custom_list >/dev/null 2>&1
+	_start_launch_core
 
-	sleep 1
-
-	enable_dns=$(uci get clash.config.enable_dns 2>/dev/null) 
-
-	if [ -z "$(grep "^ {0,}listen:" /etc/clash/config.yaml)" ] || [ -z "$(grep "^ {0,}enhanced-mode:" /etc/clash/config.yaml)" ] || [ -z "$(grep "^ {0,}dns:" /etc/clash/config.yaml)" ];then
-
-	if [ "${enable_dns:-0}" -eq 0 ];then
-			uci set clash.config.enable_dns="1" && uci commit clash
-			if [ "${lang}" == "en" ] || [ $lang == "auto" ];then
-				echo "Enabling Custom Dns" >$REAL_LOG 
-			elif [ "${lang}" == "zh_cn" ];then
-				echo "启用自定义DNS" >$REAL_LOG
-			fi
-	fi
-
-	fi
-
-	if { egrep -q '^ {0,}rule-providers:' "/etc/clash/config.yaml" || egrep -q '^ {0,}script:' "/etc/clash/config.yaml"; } && ! core_supports_advanced_features; then
-		if [ -x /usr/bin/mihomo ]; then
-			uci set clash.config.core="3" && uci commit clash
-		elif [ -x /usr/bin/clash-meta ] || [ -x /etc/clash/clash-meta ]; then
-			uci set clash.config.core="2" && uci commit clash
-		else
-			if [ "${lang}" == "en" ] || [ $lang == "auto" ];then
-				echo "Current config requires mihomo/clash-meta core" >$REAL_LOG
-			elif [ "${lang}" == "zh_cn" ];then
-				echo "当前配置需要 mihomo 或 clash-meta 内核" >$REAL_LOG
-			fi
-			backend_remove_rules >/dev/null 2>&1
-			sleep 1
-			echo "Clashoo" >$REAL_LOG
-			exit 0
-		fi
-		core=$(uci get clash.config.core 2>/dev/null)
-		CLASH="$(_detect_selected_core)"
-		sleep 1
-	fi
-        
-	if [ "$(uci get clash.config.p_mode 2>/dev/null)" = "script" ]; then
-		uci set clash.config.p_mode="rule" && uci commit clash
-	fi
-
-	sleep 1
-   	yml_change >/dev/null 2>&1
-	
-
-	if [ ! -f /etc/clash/Country.mmdb ];then
-		if [ "${lang}" == "en" ] || [ $lang == "auto" ];then
-			echo "Cannot find Country.mmdb" >$REAL_LOG 
-		elif [ "${lang}" == "zh_cn" ];then
-			echo "找不到Country.mmdb" >$REAL_LOG
-		fi	
-		sleep 1
-		echo "Clashoo" >$REAL_LOG		
-		exit 0
-	fi
-	
-	if [ ! -f /etc/clash/config.yaml ];then
-		if [ "${lang}" == "en" ] || [ $lang == "auto" ];then
-			echo "Cannot find config.yaml" >$REAL_LOG 
-		elif [ "${lang}" == "zh_cn" ];then
-			echo "找不到config.yaml" >$REAL_LOG
-		fi	
-		backend_remove_rules >/dev/null 2>&1
-		sleep 1
-		echo "Clashoo" >$REAL_LOG		
-		exit 0
-	fi
-        
-	yml_dns_change >/dev/null 2>&1
-	
-    ip_rules >/dev/null 2>&1
-	
-        
-	nohup "$CLASH" -d "$CLASH_CONFIG" > /usr/share/clash/clash.txt 2>&1 &
-	if [ "${lang}" == "en" ] || [ $lang == "auto" ];then
-		echo "mihomo Core Started Successfully " >$REAL_LOG 
-	elif [ "${lang}" == "zh_cn" ];then
-		echo "mihomo 计划任务,启动进程守护程序..." >$REAL_LOG
-	fi
-	sleep 1
-	ln -s /usr/share/clash/yacd /www/luci-static/yacd 2>/dev/null		
-
-	if [ "${lang}" == "en" ] || [ $lang == "auto" ];then
-		echo "Setting up mihomo $(backend_name) rules" >$REAL_LOG 
-	elif [ "${lang}" == "zh_cn" ];then
-		echo "设置 mihomo 网络规则" >$REAL_LOG
-	fi
-	sleep 1
-
-	backend_apply_rules >/dev/null 2>&1
-	
-	if [ "${lang}" == "en" ] || [ $lang == "auto" ];then
-		echo "Restarting Dnsmasq " >$REAL_LOG 
-	elif [ "${lang}" == "zh_cn" ];then
-    		echo "重启 Dnsmasq 程序" >$REAL_LOG
-	fi
-	sleep 1
-			
-	/etc/init.d/dnsmasq restart >/dev/null 2>&1
-	
-	restore >/dev/null 2>&1	
-	
-	if [ "${lang}" == "en" ] || [ $lang == "auto" ];then
-		echo "Setting Cron Job" >$REAL_LOG 
-		add_cron
-	elif [ "${lang}" == "zh_cn" ];then
-		echo "设置Cron" >$REAL_LOG
-		add_cron
-		
-	fi
-	sleep 1	
-	if [ "${lang}" == "en" ] || [ $lang == "auto" ];then
-		echo "mihomo Started Successfully " >$REAL_LOG
-		sleep 1
-		echo "mihomo is Running " >$REAL_LOG
-		sleep 1
-		echo "Clashoo" >$REAL_LOG
-	elif [ "${lang}" == "zh_cn" ];then
-		echo "mihomo 启动成功，请等待服务器上线！" >$REAL_LOG
-		sleep 1
-		echo "mihomo 运行中" >$REAL_LOG
-		sleep 1
-		echo "Clashoo" >$REAL_LOG
-	fi
-	core_wait=0
-	while [ "$core_wait" -lt 8 ]; do
-		if _core_running; then
-			break
-		fi
-		sleep 1
-		core_wait=$((core_wait + 1))
-	done
-
-	if ! _core_running; then
-		echo "  $(date "+%Y-%m-%d %H:%M:%S") - clash core failed to stay running after start" >> /usr/share/clash/clash.txt
-		backend_remove_rules >/dev/null 2>&1
-		_kill_core
-		sleep 1
-		echo "Clashoo" >$REAL_LOG
-	fi
 else
-	if [ "${lang}" == "en" ] || [ $lang == "auto" ];then
+	if [ "${lang}" = "en" ] || [ "${lang}" = "auto" ]; then
 		echo "  $(date "+%Y-%m-%d %H:%M:%S") -  problem with config.yaml,  config.yaml is either empty or not found " >> /usr/share/clash/clash.txt
-		echo "  problem with config file " >$REAL_LOG 
-		sleep 1
-		echo "Clashoo" >$REAL_LOG
-	elif [ "${lang}" == "zh_cn" ];then
+	elif [ "${lang}" = "zh_cn" ]; then
 		echo "  $(date "+%Y-%m-%d %H:%M:%S")  - 你的config.yaml有问题还是为了空 0kb " >> /usr/share/clash/clash.txt
-		echo "  你的config.yaml有问题还是为了空 0kb " >$REAL_LOG
-		sleep 1
-		echo "Clashoo" >$REAL_LOG 
 	fi
+	log_msg "  problem with config file " "  你的config.yaml有问题还是为了空 0kb "
+	sleep 1
+	echo "Clashoo" > "$REAL_LOG"
 fi
-fi
+
 else
-	if [ "${lang}" == "en" ] || [ $lang == "auto" ];then
-		echo "Enable Client and Start Client Again" >$REAL_LOG 
-		echo "  $(date "+%Y-%m-%d %H:%M:%S") - Enable Client and Start Client Again" >>/usr/share/clash/clash.txt
-		sleep 1
-		echo "Clashoo" >$REAL_LOG
-	elif [ "${lang}" == "zh_cn" ];then
-    		echo "启用客户端并重新启动客户端" >$REAL_LOG
-		echo "  $(date "+%Y-%m-%d %H:%M:%S") - 启用客户端并重新启动客户端" >>/usr/share/clash/clash.txt
-		sleep 1
-		echo "Clashoo" >$REAL_LOG
+	log_msg "Enable Client and Start Client Again" "启用客户端并重新启动客户端"
+	if [ "${lang}" = "en" ] || [ "${lang}" = "auto" ]; then
+		echo "  $(date "+%Y-%m-%d %H:%M:%S") - Enable Client and Start Client Again" >> /usr/share/clash/clash.txt
+	elif [ "${lang}" = "zh_cn" ]; then
+		echo "  $(date "+%Y-%m-%d %H:%M:%S") - 启用客户端并重新启动客户端" >> /usr/share/clash/clash.txt
 	fi
+	sleep 1
+	echo "Clashoo" > "$REAL_LOG"
 fi
 #=========================================================================================================================== 
 }
@@ -716,39 +657,23 @@ stop(){
 
 		sed -i '/#START/,/#END/d' "$LIST" 2>/dev/null
 
-		if [ "${lang}" == "en" ] || [ $lang == "auto" ];then
-			echo "Stopping Client..." >$REAL_LOG
-		elif [ "${lang}" == "zh_cn" ];then
-			echo "正在停止客户端..." >$REAL_LOG
-		fi
+		log_msg "Stopping Client..." "正在停止客户端..."
 		sleep 1
 		backend_remove_rules >/dev/null 2>&1
 		
-		if [ "${lang}" == "en" ] || [ $lang == "auto" ];then
-			echo "Removing mihomo $(backend_name) rules" >$REAL_LOG 
-		elif [ "${lang}" == "zh_cn" ];then
-	    	echo "清理 mihomo 网络规则" >$REAL_LOG
-		fi
+		log_msg "Removing mihomo $(backend_name) rules" "清理 mihomo 网络规则"
 		sleep 1
 		
 		bash /usr/share/clash/backup.sh >/dev/null 2>&1
 		
 		_kill_core
 
-		if [ "${lang}" == "en" ] || [ $lang == "auto" ];then
-			echo "mihomo Core Stopped Successfully " >$REAL_LOG 
-		elif [ "${lang}" == "zh_cn" ];then
-			echo "mihomo 停止进程守护程序" >$REAL_LOG
-		fi
+		log_msg "mihomo Core Stopped Successfully " "mihomo 停止进程守护程序"
 		sleep 1
 		
 		rm -rf /www/luci-static/yacd 2>/dev/null
 		
-		if [ "${lang}" == "en" ] || [ $lang == "auto" ];then
-				echo "Deleting Cron Job" >$REAL_LOG 
-		elif [ "${lang}" == "zh_cn" ];then
-			echo "删除Cron" >$REAL_LOG
-		fi
+		log_msg "Deleting Cron Job" "删除Cron"
 		sleep 1
 		
   	  	del_cron >/dev/null 2>&1
@@ -759,17 +684,14 @@ stop(){
 
 		echo "0" > /usr/share/clash/logstatus_check >/dev/null 2>&1
 		
-		if [ "${lang}" == "en" ] || [ $lang == "auto" ];then
+		if [ "${lang}" = "en" ] || [ "${lang}" = "auto" ]; then
 			echo "  $(date "+%Y-%m-%d %H:%M:%S") - CLIENT IS DISABLED " >> /usr/share/clash/clash.txt
-			echo "Client is Disabled " >$REAL_LOG
-			sleep 1
-			echo "Clashoo" >$REAL_LOG
-		elif [ "${lang}" == "zh_cn" ];then
+		elif [ "${lang}" = "zh_cn" ]; then
 			echo "  $(date "+%Y-%m-%d %H:%M:%S")  - 客户端被禁用 " >> /usr/share/clash/clash.txt
-			echo "客户端被禁用 " >$REAL_LOG
-			sleep 1
-			echo "Clashoo" >$REAL_LOG
-		fi		
+		fi
+		log_msg "Client is Disabled " "客户端被禁用 "
+		sleep 1
+		echo "Clashoo" > "$REAL_LOG"
 	
 		if _core_running; then
 			_kill_core
