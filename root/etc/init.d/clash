@@ -490,22 +490,22 @@ if [ "${enable}" -eq 1 ]; then
 
 if [ "${core}" -eq 1 ] && [ ! -x "$CLASH" ]; then
 	if [ "${lang}" == "en" ] || [ $lang == "auto" ];then
-		echo "  $(date "+%Y-%m-%d %H:%M:%S") - clash core not found, detected binary is unavailable: $CLASH" >> /usr/share/clash/clash.txt
-		echo "clash core not found, detected binary is unavailable: $CLASH" >> $REAL_LOG
+		echo "  $(date "+%Y-%m-%d %H:%M:%S") - mihomo core not found, detected binary is unavailable: $CLASH" >> /usr/share/clash/clash.txt
+		echo "mihomo core not found, detected binary is unavailable: $CLASH" >> $REAL_LOG
 	elif [ "${lang}" == "zh_cn" ];then
-		echo "  $(date "+%Y-%m-%d %H:%M:%S")  - 找不到可用的 Clash 内核: $CLASH" >> /usr/share/clash/clash.txt
-		echo "找不到可用的 Clash 内核: $CLASH" >> $REAL_LOG			
+		echo "  $(date "+%Y-%m-%d %H:%M:%S")  - 找不到可用的 mihomo 内核: $CLASH" >> /usr/share/clash/clash.txt
+		echo "找不到可用的 mihomo 内核: $CLASH" >> $REAL_LOG			
 	fi
 
 	echo "Clashoo" >$REAL_LOG
 	exit 0
 elif  [ "${core}" -eq 2 ] && [ ! -x "$CLASH" ]; then
 	if [ "${lang}" == "en" ] || [ $lang == "auto" ];then
-		echo "  $(date "+%Y-%m-%d %H:%M:%S") - clash meta core not found, detected binary is unavailable: $CLASH" >> /usr/share/clash/clash.txt
-		echo "clash meta core not found, detected binary is unavailable: $CLASH" >> $REAL_LOG
+		echo "  $(date "+%Y-%m-%d %H:%M:%S") - mihomo core not found, detected binary is unavailable: $CLASH" >> /usr/share/clash/clash.txt
+		echo "mihomo core not found, detected binary is unavailable: $CLASH" >> $REAL_LOG
 	elif [ "${lang}" == "zh_cn" ];then
-		echo "  $(date "+%Y-%m-%d %H:%M:%S")  - 找不到可用的 clash meta 内核: $CLASH" >> /usr/share/clash/clash.txt
-		echo "找不到可用的 clash meta 内核: $CLASH" >> $REAL_LOG	
+		echo "  $(date "+%Y-%m-%d %H:%M:%S")  - 找不到可用的 mihomo 内核: $CLASH" >> /usr/share/clash/clash.txt
+		echo "找不到可用的 mihomo 内核: $CLASH" >> $REAL_LOG	
 	fi	
 	sleep 1
 	echo "Clashoo" >$REAL_LOG
@@ -604,10 +604,11 @@ if  [  -f $CONFIG_YAML ] && [ "$(ls -l $CONFIG_YAML|awk '{print int($5)}')" -ne 
         
 	nohup "$CLASH" -d "$CLASH_CONFIG" > /usr/share/clash/clash.txt 2>&1 &
 	if [ "${lang}" == "en" ] || [ $lang == "auto" ];then
-		echo "Clash Core Started Successfully " >$REAL_LOG 
+		echo "mihomo Core Started Successfully " >$REAL_LOG 
 	elif [ "${lang}" == "zh_cn" ];then
-		echo "Clash 计划任务,启动进程守护程序..." >$REAL_LOG
+		echo "mihomo 计划任务,启动进程守护程序..." >$REAL_LOG
 	fi
+	sleep 1
 	ln -s /usr/share/clash/yacd /www/luci-static/yacd 2>/dev/null		
 
 	if [ "${lang}" == "en" ] || [ $lang == "auto" ];then
@@ -615,6 +616,7 @@ if  [  -f $CONFIG_YAML ] && [ "$(ls -l $CONFIG_YAML|awk '{print int($5)}')" -ne 
 	elif [ "${lang}" == "zh_cn" ];then
 		echo "设置 mihomo 网络规则" >$REAL_LOG
 	fi
+	sleep 1
 
 	backend_apply_rules >/dev/null 2>&1
 	
@@ -623,6 +625,7 @@ if  [  -f $CONFIG_YAML ] && [ "$(ls -l $CONFIG_YAML|awk '{print int($5)}')" -ne 
 	elif [ "${lang}" == "zh_cn" ];then
     		echo "重启 Dnsmasq 程序" >$REAL_LOG
 	fi
+	sleep 1
 			
 	/etc/init.d/dnsmasq restart >/dev/null 2>&1
 	
@@ -635,17 +638,18 @@ if  [  -f $CONFIG_YAML ] && [ "$(ls -l $CONFIG_YAML|awk '{print int($5)}')" -ne 
 		echo "设置Cron" >$REAL_LOG
 		add_cron
 		
-	fi	
+	fi
+	sleep 1	
 	if [ "${lang}" == "en" ] || [ $lang == "auto" ];then
-		echo "Clash Started Successfully " >$REAL_LOG
+		echo "mihomo Started Successfully " >$REAL_LOG
 		sleep 1
-		echo "Clash is Running " >$REAL_LOG
+		echo "mihomo is Running " >$REAL_LOG
 		sleep 1
 		echo "Clashoo" >$REAL_LOG
 	elif [ "${lang}" == "zh_cn" ];then
-		echo "Clash 启动成功，请等待服务器上线！" >$REAL_LOG
+		echo "mihomo 启动成功，请等待服务器上线！" >$REAL_LOG
 		sleep 1
-		echo "Clash运行中" >$REAL_LOG
+		echo "mihomo 运行中" >$REAL_LOG
 		sleep 1
 		echo "Clashoo" >$REAL_LOG
 	fi
@@ -721,20 +725,22 @@ stop(){
 		backend_remove_rules >/dev/null 2>&1
 		
 		if [ "${lang}" == "en" ] || [ $lang == "auto" ];then
-			echo "Removing clash $(backend_name) rules" >$REAL_LOG 
+			echo "Removing mihomo $(backend_name) rules" >$REAL_LOG 
 		elif [ "${lang}" == "zh_cn" ];then
 	    	echo "清理 mihomo 网络规则" >$REAL_LOG
 		fi
+		sleep 1
 		
 		bash /usr/share/clash/backup.sh >/dev/null 2>&1
 		
 		_kill_core
 
 		if [ "${lang}" == "en" ] || [ $lang == "auto" ];then
-			echo "Clash Core Stoped Successfully " >$REAL_LOG 
+			echo "mihomo Core Stopped Successfully " >$REAL_LOG 
 		elif [ "${lang}" == "zh_cn" ];then
-			echo "Clash 停止进程守护程序" >$REAL_LOG
+			echo "mihomo 停止进程守护程序" >$REAL_LOG
 		fi
+		sleep 1
 		
 		rm -rf /www/luci-static/yacd 2>/dev/null
 		
@@ -743,6 +749,7 @@ stop(){
 		elif [ "${lang}" == "zh_cn" ];then
 			echo "删除Cron" >$REAL_LOG
 		fi
+		sleep 1
 		
   	  	del_cron >/dev/null 2>&1
 	    sleep 1		

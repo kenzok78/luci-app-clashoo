@@ -21,7 +21,7 @@ return view.extend({
         o = s.option(form.Flag, 'enable_dns', _('启用 DNS 模块'));
         o.default = '1';
 
-        o = s.option(form.Value, 'dns_port', _('DNS 监听端口'));
+        o = s.option(form.Value, 'listen_port', _('DNS 监听端口'));
         o.default = '1053';
         o.datatype = 'port';
         o.depends('enable_dns', '1');
@@ -47,7 +47,7 @@ return view.extend({
         o = s.option(form.Flag, 'dnsforwader', _('强制转发 DNS'));
         o.default = '0';
 
-        o = s.option(form.DynamicList, 'dns_fake_ip_filter', _('Fake-IP 过滤域名'), _('匹配的域名返回真实 IP，不走 Fake-IP'));
+        o = s.option(form.DynamicList, 'fake_ip_filter', _('Fake-IP 过滤域名'), _('匹配的域名返回真实 IP，不走 Fake-IP'));
         o.rmempty = true;
         o.default = ['*.lan', '*.local', 'localhost.ptlogin2.qq.com', '+.stun.*.*', '+.stun.*.*.*', 'time.windows.com', 'time.nist.gov', 'time.apple.com'];
         o.depends({ enable_dns: '1', enhanced_mode: 'fake-ip' });
@@ -77,10 +77,17 @@ return view.extend({
         s.addremove = true;
         s.anonymous = true;
 
-        o = s.option(form.Value, 'domain', _('域名'));
-        o.placeholder = 'any:53';
-        o = s.option(form.Value, 'server', _('目标 DNS'));
+        o = s.option(form.ListValue, 'type', _('协议类型'));
+        o.value('none', _('无（仅 IP）'));
+        o.value('tcp://', 'TCP');
+        o.value('udp://', 'UDP');
+        o.default = 'none';
+        o = s.option(form.Value, 'ip', _('目标 DNS'));
         o.placeholder = '1.1.1.1';
+        o = s.option(form.Value, 'port', _('端口'));
+        o.datatype = 'port';
+        o.placeholder = '53';
+        o.rmempty = true;
 
         /* ─── 代理认证 ─── */
         s = m.section(form.TypedSection, 'authentication', _('代理认证'));
@@ -99,8 +106,8 @@ return view.extend({
             return node;
         };
 
-        o = s.option(form.Value, 'user', _('用户名'));
-        o = s.option(form.Value, 'pass', _('密码'));
+        o = s.option(form.Value, 'username', _('用户名'));
+        o = s.option(form.Value, 'password', _('密码'));
         o.password = true;
 
         return m.render();
