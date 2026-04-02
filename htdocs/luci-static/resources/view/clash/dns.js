@@ -114,6 +114,6 @@ return view.extend({
     },
 
     handleSaveApply: function (ev) {
-        return this.handleSave(ev).then(() => clash.restart());
+        return this.handleSave(ev).then(() => clash.restart()).catch(function(e) { L.ui.addNotification(null, E('p', '保存失败: ' + (e.message || e))); });
     }
 });

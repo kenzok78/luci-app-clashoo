@@ -5,6 +5,10 @@
 import { access, popen, glob, readfile, writefile, stat, unlink } from 'fs';
 import { cursor } from 'uci';
 
+function escapeShellArg(s) {
+	return "'" + replace(s + '', "'", "'\\''") + "'";
+}
+
 const BINARY_PATHS = [
 '/usr/bin/mihomo',
 '/usr/bin/clash-meta',
@@ -63,7 +67,7 @@ return ip;
 
 function get_core_version(binary) {
 if (!binary) return '';
-let p = popen(binary + ' -v 2>&1 | head -1');
+let p = popen(escapeShellArg(binary) + ' -v 2>&1 | head -1');
 if (!p) return '';
 let v = trim(p.read('all'));
 p.close();
@@ -102,7 +106,7 @@ return profiles;
 function get_log_content() {
 for (let path in LOG_PATHS) {
 if (!access(path, 'r')) continue;
-let p = popen("tail -300 '" + path + "'");
+let p = popen("tail -300 " + escapeShellArg(path));
 if (p) { let c = p.read('all'); p.close(); return c; }
 }
 return '';
@@ -275,7 +279,7 @@ update_panel: {
 args: { name: 'name' },
 call: function(req) {
 let name = req.args?.name || 'metacubexd';
-system("sh /usr/share/clash/panel_download.sh '" + name + "' >/dev/null 2>&1 &");
+system("sh /usr/share/clash/panel_download.sh " + escapeShellArg(name) + " >/dev/null 2>&1 &");
 return { success: true };
 }
 },
@@ -474,8 +478,8 @@ call: function() {
 let c = cursor(); c.load('clash');
 let url4 = c.get('clash', 'config', 'china_ip_url')   || 'https://ispip.clang.cn/all_cn.txt';
 let url6 = c.get('clash', 'config', 'china_ipv6_url') || 'https://ispip.clang.cn/all_cn_ipv6.txt';
-system("curl -fsSL '" + url4 + "' -o /usr/share/clash/china_ip.txt   >>/usr/share/clash/clash.txt 2>&1 &");
-system("curl -fsSL '" + url6 + "' -o /usr/share/clash/china_ipv6.txt >>/usr/share/clash/clash.txt 2>&1 &");
+system("curl -fsSL " + escapeShellArg(url4) + " -o /usr/share/clash/china_ip.txt   >>/usr/share/clash/clash.txt 2>&1 &");
+system("curl -fsSL " + escapeShellArg(url6) + " -o /usr/share/clash/china_ipv6.txt >>/usr/share/clash/clash.txt 2>&1 &");
 return { success: true };
 }
 },
@@ -504,7 +508,7 @@ read_config_file: {
 args: { path: 'path' },
 call: function(req) {
 let path = req.args?.path || '';
-if (!path || !match(path, /^\/usr\/share\/clash\/config\//)) return { error: 'invalid path' };
+if (!path || !match(path, /^\/usr\/share\/clash\/config\//) || index(path, '..') >= 0) return { error: 'invalid path' };
 if (!access(path, 'r')) return { error: 'not found' };
 return { content: readfile(path) || '' };
 }
@@ -515,7 +519,7 @@ args: { path: 'path', content: 'content' },
 call: function(req) {
 let path    = req.args?.path    || '';
 let content = req.args?.content || '';
-if (!path || !match(path, /^\/usr\/share\/clash\/config\//)) return { error: 'invalid path' };
+if (!path || !match(path, /^\/usr\/share\/clash\/config\//) || index(path, '..') >= 0) return { error: 'invalid path' };
 writefile(path, content);
 return { success: true };
 }

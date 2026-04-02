@@ -123,7 +123,7 @@ return view.extend({
         let _lastRealLog  = '';
         let _stableTicks  = 0;
 
-        function $id(id) { return document.getElementById(id) || node.querySelector('#' + id); }
+        function $id(id) { return document.contains(node) ? document.getElementById(id) : null; }
 
         poll.add(function () {
             return clash.readRealLog().then(function (c) {
@@ -151,7 +151,7 @@ return view.extend({
                     title.textContent = text;
                     title.style.color = '#777';
                 }
-            });
+            }).catch(function() {});
         }, 1);
 
         /* ── render dynamic ── */
@@ -179,11 +179,11 @@ return view.extend({
                 grp.appendChild(running
                     ? mkBtn('停止客户端', '#6c757d', () => {
                         _uiLockUntil = Date.now() + 3000;
-                        clash.stop();
+                        clash.stop().catch(function(e) { L.ui.addNotification(null, E('p', '操作失败: ' + e.message)); });
                       })
                     : mkBtn('启用客户端', '#4a76d4', () => {
                         _uiLockUntil = Date.now() + 3000;
-                        clash.start();
+                        clash.start().catch(function(e) { L.ui.addNotification(null, E('p', '操作失败: ' + e.message)); });
                       }));
                 elClient.appendChild(grp);
             }
@@ -254,7 +254,7 @@ return view.extend({
         }
 
         update(data[0] || {});
-        poll.add(() => clash.status().then(s => update(s)), 3);
+        poll.add(() => clash.status().then(s => update(s)).catch(function() {}), 3);
 
         /* ── 访问检查 ── */
         let _probeHistory = {};
@@ -323,7 +323,7 @@ return view.extend({
         }
         /* 异步探测，完成后更新卡片 */
         setTimeout(function() { probeAll(); }, 100);
-        poll.add(function() { return probeAll(); }, 30);
+        poll.add(function() { return probeAll().catch(function() {}); }, 30);
 
         return node;
     },

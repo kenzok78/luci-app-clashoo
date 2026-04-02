@@ -11,8 +11,7 @@ let callDeleteCfg   = rpc.declare({ object: 'luci.clash', method: 'delete_config
 let callDownloadSubs= rpc.declare({ object: 'luci.clash', method: 'download_subs', expect: {} });
 let callUpdateSub   = rpc.declare({ object: 'luci.clash', method: 'update_sub', params: ['name'], expect: {} });
 let callSetConfig   = rpc.declare({ object: 'luci.clash', method: 'set_config', params: ['name'], expect: {} });
-let callReadFile    = rpc.declare({ object: 'luci.clash', method: 'read_config_file', params: ['path'], expect: {} });
-let callWriteFile   = rpc.declare({ object: 'luci.clash', method: 'write_config_file', params: ['path', 'content'], expect: {} });
+
 
 function mkBtn(label, style, fn) {
     let b = E('button', {

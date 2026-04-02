@@ -43,7 +43,7 @@ return view.extend({
         o.write = function () {};
         o.onchange = function (ev, sid, opt, val) {
             if (!val) return;
-            clash.setConfig(val).then(function () { window.location.reload(); });
+            clash.setConfig(val).then(function () { window.location.reload(); }).catch(function(e) { L.ui.addNotification(null, E('p', '切换配置失败: ' + (e.message || e))); });
         };
 
         o = s.option(form.Value, 'start_delay', '启动延迟（秒）');

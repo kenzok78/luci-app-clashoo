@@ -3,9 +3,9 @@
 
 		lang=$(uci get luci.main.lang 2>/dev/null)
 		REAL_LOG="/usr/share/clash/clash_real.txt"
-		if [ $lang == "en" ] || [ $lang == "auto" ];then
+		if [ "$lang" = "en" ] || [ "$lang" = "auto" ];then
 				echo "Setting DNS" >$REAL_LOG   
-		elif [ $lang == "zh_cn" ];then
+		elif [ "$lang" = "zh_cn" ];then
 				 echo "设定DNS" >$REAL_LOG
 		fi
 
@@ -38,44 +38,44 @@
 		grep -Eq '^mixed-port:|^port:|^external-controller:|^secret:|^socks-port:|^redir-port:' "$CONFIG_YAML" && has_runtime_block=1
 		grep -Eq '^dns:' "$CONFIG_YAML" && has_dns_block=1
 
-		rm -rf $TEMP_FILE 2>/dev/null
-		rm -f $CONFIG_START 2>/dev/null
-		: > $CONFIG_START
+		rm -rf "$TEMP_FILE" 2>/dev/null
+		rm -f "$CONFIG_START" 2>/dev/null
+		: > "$CONFIG_START"
 		
 		if [ "$has_runtime_block" -eq 0 ]; then
 			echo " " >>/tmp/dns.yaml 2>/dev/null
-			sed -i "1i\#****CLASH-CONFIG-START****#" $CONFIG_START 2>/dev/null
-			sed -i "2i\port: ${http_port}" $CONFIG_START 2>/dev/null
-			sed -i "/port: ${http_port}/a\socks-port: ${socks_port}" $CONFIG_START 2>/dev/null 
-			sed -i "/socks-port: ${socks_port}/a\redir-port: ${redir_port}" $CONFIG_START 2>/dev/null 
-			sed -i "/redir-port: ${redir_port}/a\mixed-port: ${mixed_port}" $CONFIG_START 2>/dev/null 
-			sed -i "/mixed-port: ${mixed_port}/a\ipv6: ${enable_ipv6}" $CONFIG_START 2>/dev/null
-			sed -i "/ipv6: ${enable_ipv6}/a\allow-lan: ${allow_lan}" $CONFIG_START 2>/dev/null
-			if [ $allow_lan == "true" ]; then
-				sed -i "/allow-lan: ${allow_lan}/a\bind-address: \"${bind_addr}\"" $CONFIG_START 2>/dev/null 
-				sed -i "/bind-address: \"${bind_addr}\"/a\mode: ${p_mode}" $CONFIG_START 2>/dev/null
-				sed -i "/mode: ${p_mode}/a\log-level: ${log_level}" $CONFIG_START 2>/dev/null 
-				sed -i "/log-level: ${log_level}/a\external-controller: 0.0.0.0:${dash_port}" $CONFIG_START 2>/dev/null 
-				sed -i "/external-controller: 0.0.0.0:${dash_port}/a\secret: \"${da_password}\"" $CONFIG_START 2>/dev/null 
-				sed -i "/secret: \"${da_password}\"/a\external-ui: \"./dashboard\"" $CONFIG_START 2>/dev/null 
-				sed -i -e "\$a " $CONFIG_START 2>/dev/null
+			sed -i "1i\#****CLASH-CONFIG-START****#" "$CONFIG_START" 2>/dev/null
+			sed -i "2i\port: ${http_port}" "$CONFIG_START" 2>/dev/null
+			sed -i "/port: ${http_port}/a\socks-port: ${socks_port}" "$CONFIG_START" 2>/dev/null 
+			sed -i "/socks-port: ${socks_port}/a\redir-port: ${redir_port}" "$CONFIG_START" 2>/dev/null 
+			sed -i "/redir-port: ${redir_port}/a\mixed-port: ${mixed_port}" "$CONFIG_START" 2>/dev/null 
+			sed -i "/mixed-port: ${mixed_port}/a\ipv6: ${enable_ipv6}" "$CONFIG_START" 2>/dev/null
+			sed -i "/ipv6: ${enable_ipv6}/a\allow-lan: ${allow_lan}" "$CONFIG_START" 2>/dev/null
+			if [ "$allow_lan" = "true" ]; then
+				sed -i "/allow-lan: ${allow_lan}/a\bind-address: \"${bind_addr}\"" "$CONFIG_START" 2>/dev/null 
+				sed -i "/bind-address: \"${bind_addr}\"/a\mode: ${p_mode}" "$CONFIG_START" 2>/dev/null
+				sed -i "/mode: ${p_mode}/a\log-level: ${log_level}" "$CONFIG_START" 2>/dev/null 
+				sed -i "/log-level: ${log_level}/a\external-controller: 0.0.0.0:${dash_port}" "$CONFIG_START" 2>/dev/null 
+				sed -i "/external-controller: 0.0.0.0:${dash_port}/a\secret: \"${da_password}\"" "$CONFIG_START" 2>/dev/null 
+				sed -i "/secret: \"${da_password}\"/a\external-ui: \"./dashboard\"" "$CONFIG_START" 2>/dev/null 
+				sed -i -e "\$a " "$CONFIG_START" 2>/dev/null
 			else
-				sed -i "/allow-lan: ${allow_lan}/a\mode: Rule" $CONFIG_START 2>/dev/null
-				sed -i "/mode: Rule/a\log-level: ${log_level}" $CONFIG_START 2>/dev/null 
-				sed -i "/log-level: ${log_level}/a\external-controller: 0.0.0.0:${dash_port}" $CONFIG_START 2>/dev/null 
-				sed -i "/external-controller: 0.0.0.0:${dash_port}/a\secret: \"${da_password}\"" $CONFIG_START 2>/dev/null 
-				sed -i "/secret: \"${da_password}\"/a\external-ui: \"./dashboard\"" $CONFIG_START 2>/dev/null 
-				sed -i -e "\$a " $CONFIG_START 2>/dev/null
+				sed -i "/allow-lan: ${allow_lan}/a\mode: rule" "$CONFIG_START" 2>/dev/null
+				sed -i "/mode: rule/a\log-level: ${log_level}" "$CONFIG_START" 2>/dev/null 
+				sed -i "/log-level: ${log_level}/a\external-controller: 0.0.0.0:${dash_port}" "$CONFIG_START" 2>/dev/null 
+				sed -i "/external-controller: 0.0.0.0:${dash_port}/a\secret: \"${da_password}\"" "$CONFIG_START" 2>/dev/null 
+				sed -i "/secret: \"${da_password}\"/a\external-ui: \"./dashboard\"" "$CONFIG_START" 2>/dev/null 
+				sed -i -e "\$a " "$CONFIG_START" 2>/dev/null
 			fi
 		fi
 
-cat $CONFIG_START >> $TEMP_FILE 2>/dev/null
-if [ "$interf" -eq 1 ] && [ ! -z "$interf_name" ] ;then
+cat "$CONFIG_START" >> "$TEMP_FILE" 2>/dev/null
+if [ "${interf:-0}" -eq 1 ] && [ ! -z "$interf_name" ] ;then
 cat >> "/tmp/interf_name.yaml" <<-EOF
 interface-name: ${interf_name} 
 EOF
 
-cat /tmp/interf_name.yaml >> $TEMP_FILE 2>/dev/null
+cat /tmp/interf_name.yaml >> "$TEMP_FILE" 2>/dev/null
 sed -i -e "\$a " $TEMP_FILE 2>/dev/null
 
 fi
@@ -107,9 +107,9 @@ sed -i -e "\$a " $TEMP_FILE 2>/dev/null
 
 
 
-if [ "${tun_mode}" -eq 1 ];then
+if [ "${tun_mode:-0}" -eq 1 ];then
 
-if [ "${core}" -eq 4 ] || [ "${core}" -eq 3 ];then
+if [ "${core:-0}" -eq 4 ] || [ "${core:-0}" -eq 3 ];then
 
 cat >> "/tmp/tun.yaml" <<-EOF
 tun:
@@ -118,7 +118,7 @@ tun:
 EOF
 
 
-if [ $core -eq 3 ];then
+if [ "${core:-0}" -eq 3 ];then
 
 cat >> "/tmp/tun.yaml" <<-EOF
   device-url: dev://utun
@@ -199,7 +199,7 @@ sleep 1
 
 enable_dns=$(uci get clash.config.enable_dns 2>/dev/null) 
 
-if [ "$enable_dns" -eq 1 ] && [ "$has_dns_block" -eq 0 ];then
+if [ "${enable_dns:-0}" -eq 1 ] && [ "$has_dns_block" -eq 0 ];then
 
 
 cat >> "/tmp/enable_dns.yaml" <<-EOF
@@ -378,7 +378,7 @@ add_address(){
 	do
 	line=$(sed -n "$count_num"p /tmp/server.conf)
 	check_addr=$(grep -F "$line" "/usr/share/clash/server.list")
-	if [ -z $check_addr ];then
+	if [ -z "$check_addr" ];then
 	echo $line >>/usr/share/clashbackup/address.list
 	fi	
 	count_num=$(( $count_num + 1))	
@@ -424,9 +424,9 @@ add_address(){
 			fi
 
 
-			if [ $lang == "en" ] || [ $lang == "auto" ];then
+			if [ "$lang" = "en" ] || [ "$lang" = "auto" ];then
 				echo "Setting Up Fake-IP Filter" >$REAL_LOG 
-			elif [ $lang == "zh_cn" ];then
+			elif [ "$lang" = "zh_cn" ];then
 				 echo "正在设置Fake-IP黑名单" >$REAL_LOG
 			fi	
 

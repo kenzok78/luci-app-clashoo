@@ -23,7 +23,7 @@ return view.extend({
         o.onclick = function (_, section_id) {
             let el = m.lookupOption('_log_content', section_id);
             if (el && el[0]) el[0].getUIElement(section_id).setValue('');
-            return clash.clearLog();
+            return clash.clearLog().catch(function(e) { L.ui.addNotification(null, E('p', '操作失败: ' + (e.message || e))); });
         };
 
         o = s.option(form.TextValue, '_log_content', _(''));
@@ -37,7 +37,7 @@ return view.extend({
             return clash.readLog().then(function (content) {
                 let ui = opt.getUIElement('config');
                 if (ui) ui.setValue(content);
-            });
+            }).catch(function() {});
         }, o), 5);
 
         o = s.option(form.Button, '_scroll_bottom', _(''));

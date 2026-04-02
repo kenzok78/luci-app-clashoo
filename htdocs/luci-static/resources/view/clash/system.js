@@ -7,7 +7,7 @@
 'require tools.clash as clash';
 
 let callGetArch = rpc.declare({ object: 'luci.clash', method: 'get_cpu_arch', expect: { arch: '' } });
-let callGetLogStatus = rpc.declare({ object: 'luci.clash', method: 'get_log_status' });
+
 
 return view.extend({
     load: function () {
@@ -61,7 +61,7 @@ return view.extend({
         o.onclick = function () {
             return m.save().then(() => clash.downloadCore()).then(() => {
                 L.ui.addNotification(null, E('p', _('下载任务已启动，请稍后刷新查看结果')));
-            });
+            }).catch(function(e) { L.ui.addNotification(null, E('p', '操作失败: ' + (e.message || e))); });
         };
 
         /* ─── GeoIP / GeoSite ─── */
@@ -129,7 +129,7 @@ return view.extend({
         o.onclick = function () {
             return m.save().then(() => clash.updateGeoip()).then(() => {
                 L.ui.addNotification(null, E('p', _('GeoIP 更新任务已启动')));
-            });
+            }).catch(function(e) { L.ui.addNotification(null, E('p', '操作失败: ' + (e.message || e))); });
         };
 
         /* ─── 绕过 ─── */
@@ -159,7 +159,7 @@ return view.extend({
         o.onclick = function () {
             return m.save().then(() => clash.updateChinaIp()).then(() => {
                 L.ui.addNotification(null, E('p', _('大陆白名单更新任务已启动，稍后可在更新日志中查看进度')));
-            });
+            }).catch(function(e) { L.ui.addNotification(null, E('p', '操作失败: ' + (e.message || e))); });
         };
 
         o = s.option(form.Value, 'proxy_tcp_dport', _('要代理的 TCP 目标端口'));
@@ -245,7 +245,7 @@ return view.extend({
 
                 let clearBtn = E('button', {
                     class: 'btn cbi-button cbi-button-negative',
-                    onclick: function () { ta.value = ''; return clearFn(); }
+                    onclick: function () { ta.value = ''; return clearFn().catch(function(e) { L.ui.addNotification(null, E('p', '操作失败: ' + (e.message || e))); }); }
                 }, [_('清空日志')]);
 
                 let scrollBtn = E('button', {
@@ -260,7 +260,7 @@ return view.extend({
                 ]);
 
                 poll.add(function () {
-                    return readFn().then(function (c) { ta.value = processLog(c); });
+                    return readFn().then(function (c) { ta.value = processLog(c); }).catch(function() {});
                 }, 5);
 
                 return panel;
@@ -341,6 +341,6 @@ return view.extend({
     },
 
     handleSaveApply: function (ev) {
-        return this.handleSave(ev).then(() => clash.restart());
+        return this.handleSave(ev).then(() => clash.restart()).catch(function(e) { L.ui.addNotification(null, E('p', '保存失败: ' + (e.message || e))); });
     }
 });
