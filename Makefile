@@ -10,7 +10,7 @@ define Package/$(PKG_NAME)
 	SECTION:=luci
 	CATEGORY:=LuCI
 	SUBMENU:=3. Applications
-	TITLE:=LuCI app for clash
+	TITLE:=LuCI app for Clashoo
 	DEPENDS:=+luci-base +bash +ca-bundle +curl +yq +firewall4 +ip-full +kmod-inet-diag +kmod-nft-socket +kmod-nft-tproxy +kmod-tun +kmod-dummy
 	PKGARCH:=all
 	MAINTAINER:=frainzy1477

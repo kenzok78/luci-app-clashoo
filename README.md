@@ -1,6 +1,12 @@
-# luci-app-clashoo
+<p align="center">
+  <img src="logo.png" alt="Clashoo" width="160" />
+</p>
 
-基于 [mihomo](https://github.com/MetaCubeX/mihomo) 内核的 OpenWrt LuCI 代理管理界面。
+<h1 align="center">luci-app-clashoo</h1>
+
+<p align="center">
+  基于 <a href="https://github.com/MetaCubeX/mihomo">mihomo</a> 内核的 OpenWrt LuCI 代理管理界面
+</p>
 
 ## 功能特性
 

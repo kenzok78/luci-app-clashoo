@@ -1,4 +1,4 @@
-name: Build luci-app-clash
+name: Build luci-app-clashoo
 
 on:
   workflow_dispatch:
@@ -84,7 +84,7 @@ jobs:
         env:
           ARCH: ${{ matrix.arch }}-${{ matrix.sdk }}
           FEEDNAME: packages_ci
-          PACKAGES: luci-app-clash
+          PACKAGES: luci-app-clashoo
           NO_REFRESH_CHECK: true
           IGNORE_ERRORS: true
 
@@ -98,7 +98,7 @@ jobs:
         run: |
           zip -j ${{ matrix.arch }}-${{ matrix.sdk }}.zip \
             bin/packages/${{ matrix.arch }}/packages_ci/*.ipk
-          echo -e "**luci-app-clash** 编译包 🎈\n" >> release.txt
+          echo -e "**luci-app-clashoo** 编译包 🎈\n" >> release.txt
           echo -e "架构: \`${{ matrix.arch }}\`，SDK: ${{ matrix.sdk }}\n" >> release.txt
           echo -e "安装方法：将 ipk 文件上传到设备 \`/tmp\` 目录，执行 \`opkg install *.ipk\`\n" >> release.txt
 

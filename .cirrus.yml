@@ -1,6 +1,6 @@
 env:
   SDK_VERSION: "24.10.4"
-  PACKAGE: "luci-app-clash"
+  PACKAGE: "luci-app-clashoo"
   FEEDNAME: "packages_ci"
   SDK_DIR: /home/user/sdk
   GITHUB_TOKEN: ENCRYPTED[!9babbfba673722cd96e111fb4e278f2995f48301e0c2f0072d2175a78bae8ad83ef46460fbfb0204cfbfadfcec2f202b!]

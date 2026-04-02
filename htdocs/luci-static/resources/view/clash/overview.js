@@ -3,6 +3,32 @@
 'require poll';
 'require tools.clash as clash';
 
+/* ── 常量 ── */
+const UI_LOCK_MS      = 3000;   /* 按钮点击后 UI 锁定时长 */
+const PROBE_TIMEOUT   = 5000;   /* 连接探测超时(ms) */
+const PROBE_INTERVAL  = 30;     /* 探测轮询间隔(s) */
+const STATUS_INTERVAL = 3;      /* 状态轮询间隔(s) */
+const PROBE_HISTORY   = 15;     /* 每站点最大历史记录条数 */
+const LATENCY_WARN    = 300;    /* 延迟黄色阈值(ms) */
+
+const COLORS = {
+    running:   '#1f8b4c',   /* 运行中/绿色 */
+    stopped:   '#b58900',   /* 已停止/琥珀 */
+    primary:   '#4a76d4',   /* 主操作按钮 */
+    secondary: '#6c757d',   /* 次操作按钮 */
+    success:   '#28a745',   /* 延迟正常 */
+    warning:   '#ffc107',   /* 延迟偏高 */
+    danger:    '#dc3545',   /* 超时/错误 */
+    muted:     '#adb5bd',   /* 禁用态 */
+    accent:    '#0d8f5b',   /* 更新面板按钮 */
+    intl:      '#20c997',   /* 国外标签 */
+    domestic:  '#17a2b8',   /* 国内标签 */
+    textMuted: '#aaa',      /* 副标题/灰色文字 */
+    textLight: '#777',      /* 滚动日志文字 */
+    textLabel: '#555',      /* 表格标签 */
+    textNone:  '#999',      /* 无数据 */
+};
+
 const PROBE_SITES = [
     { id: 'bilibili',  label: 'Bilibili', type: '国内',
       url: 'https://www.bilibili.com/favicon.ico',
@@ -85,6 +111,8 @@ return view.extend({
 
         let _uiLockUntil = 0;   /* 按钮点击后短暂禁止重渲染 */
         let _isRunning   = false;
+        /* diff-update: 缓存上次状态，只在数据变化时重绘 */
+        let _prev = {};
 
         /* ── structure ── */
         let node = E('div', {}, [
@@ -146,10 +174,10 @@ return view.extend({
                 /* 文字是 "Clashoo" 或稳定3秒 → 显示 "Clashoo"，颜色跟运行状态 */
                 if (text === 'Clashoo' || _stableTicks >= 3) {
                     title.textContent = 'Clashoo';
-                    title.style.color = _isRunning ? '#1f8b4c' : '#aaa';
+                    title.style.color = _isRunning ? COLORS.running : COLORS.textMuted;
                 } else {
                     title.textContent = text;
-                    title.style.color = '#777';
+                    title.style.color = COLORS.textLight;
                 }
             }).catch(function() {});
         }, 1);
@@ -169,28 +197,32 @@ return view.extend({
             const localIp   = s.local_ip    || location.hostname;
             const dashOk    = !!s.dashboard_installed || !!s.yacd_installed;
 
-            /* Client */
+            /* Client — only rebuild when running state changes */
             let elClient = $id('ov-client');
-            if (elClient && !locked) {
+            if (elClient && !locked && _prev.running !== running) {
+                _prev.running = running;
                 elClient.innerHTML = '';
                 let grp = mkBtnGroup();
                 grp.appendChild(mkBtn(running ? '运行中' : '已停止',
-                    running ? '#1f8b4c' : '#b58900', null));
+                    running ? COLORS.running : COLORS.stopped, null));
                 grp.appendChild(running
-                    ? mkBtn('停止客户端', '#6c757d', () => {
-                        _uiLockUntil = Date.now() + 3000;
+                    ? mkBtn('停止客户端', COLORS.secondary, () => {
+                        _uiLockUntil = Date.now() + UI_LOCK_MS;
+                        _prev.running = undefined;
                         clash.stop().catch(function(e) { L.ui.addNotification(null, E('p', '操作失败: ' + e.message)); });
                       })
-                    : mkBtn('启用客户端', '#4a76d4', () => {
-                        _uiLockUntil = Date.now() + 3000;
+                    : mkBtn('启用客户端', COLORS.primary, () => {
+                        _uiLockUntil = Date.now() + UI_LOCK_MS;
+                        _prev.running = undefined;
                         clash.start().catch(function(e) { L.ui.addNotification(null, E('p', '操作失败: ' + e.message)); });
                       }));
                 elClient.appendChild(grp);
             }
 
-            /* Mode */
+            /* Mode — only rebuild when value changes */
             let elMode = $id('ov-mode');
-            if (elMode) {
+            if (elMode && _prev.mode !== modeValue) {
+                _prev.mode = modeValue;
                 elMode.innerHTML = '';
                 elMode.appendChild(mkSel('sel-mode', [
                     ['fake-ip', 'Fake-IP'],
@@ -199,9 +231,11 @@ return view.extend({
                 ], modeValue, v => clash.setMode(v)));
             }
 
-            /* Config */
+            /* Config — only rebuild when config list or selection changes */
+            let cfgKey = configs.join(',') + '|' + curConf;
             let elCfg = $id('ov-config');
-            if (elCfg) {
+            if (elCfg && _prev.cfgKey !== cfgKey) {
+                _prev.cfgKey = cfgKey;
                 elCfg.innerHTML = '';
                 let opts = configs.length ? configs.map(c => [c, c]) : [['', '（无配置）']];
                 if (curConf && !configs.includes(curConf)) opts.unshift([curConf, curConf]);
@@ -209,9 +243,10 @@ return view.extend({
                     v => v && clash.setConfig(v)));
             }
 
-            /* Proxy mode */
+            /* Proxy mode — only rebuild when value changes */
             let elProxy = $id('ov-proxy');
-            if (elProxy) {
+            if (elProxy && _prev.proxy !== proxyMode) {
+                _prev.proxy = proxyMode;
                 elProxy.innerHTML = '';
                 elProxy.appendChild(mkSel('sel-proxy', [
                     ['rule',   '规则模式'],
@@ -220,9 +255,10 @@ return view.extend({
                 ], proxyMode, v => clash.setProxyMode(v)));
             }
 
-            /* Panel type */
+            /* Panel type — only rebuild when value changes */
             let elPanel = $id('ov-panel');
-            if (elPanel) {
+            if (elPanel && _prev.panel !== panelType) {
+                _prev.panel = panelType;
                 elPanel.innerHTML = '';
                 elPanel.appendChild(mkSel('sel-panel', [
                     ['metacubexd', 'MetaCubeXD Panel'],
@@ -232,29 +268,31 @@ return view.extend({
                 ], panelType, v => clash.setPanel(v)));
             }
 
-            /* Panel address */
+            /* Panel address — only rebuild when relevant data changes */
+            let addrKey = panelType + '|' + dashPort + '|' + dashPass + '|' + localIp + '|' + dashOk;
             let elAddr = $id('ov-panel-addr');
-            if (elAddr) {
+            if (elAddr && _prev.addrKey !== addrKey) {
+                _prev.addrKey = addrKey;
                 elAddr.innerHTML = '';
                 let authSuffix = dashPass ? '?secret=' + encodeURIComponent(dashPass) : '';
                 let panelUrl   = 'http://' + localIp + ':' + dashPort + '/ui' + authSuffix;
                 let grp = mkBtnGroup();
-                grp.appendChild(mkBtn('更新面板', '#0d8f5b', () => clash.updatePanel(panelType)));
+                grp.appendChild(mkBtn('更新面板', COLORS.accent, () => clash.updatePanel(panelType)));
                 if (dashOk) {
                     let a = E('a', {
                         href: panelUrl, target: '_blank', rel: 'noopener',
-                        style: BTN_STYLE + ';background:#adb5bd;text-decoration:none'
+                        style: BTN_STYLE + ';background:' + COLORS.muted + ';text-decoration:none'
                     }, '打开面板');
                     grp.appendChild(a);
                 } else {
-                    grp.appendChild(mkBtn('打开面板', '#adb5bd', null));
+                    grp.appendChild(mkBtn('打开面板', COLORS.muted, null));
                 }
                 elAddr.appendChild(grp);
             }
         }
 
         update(data[0] || {});
-        poll.add(() => clash.status().then(s => update(s)).catch(function() {}), 3);
+        poll.add(() => clash.status().then(s => update(s)).catch(function() {}), STATUS_INTERVAL);
 
         /* ── 访问检查 ── */
         let _probeHistory = {};
@@ -265,10 +303,10 @@ return view.extend({
 
             let isIntl      = site.type === '国外';
             let badgeStyle  = 'font-size:.72rem;padding:2px 8px;border-radius:999px;border:1.5px solid;font-weight:600;' +
-                (isIntl ? 'color:#20c997;border-color:#20c997' : 'color:#17a2b8;border-color:#17a2b8');
-            let latencyColor = !latest ? '#999'
-                : !latest.ok           ? '#dc3545'
-                : latest.ms < 300      ? '#28a745' : '#ffc107';
+                (isIntl ? 'color:' + COLORS.intl + ';border-color:' + COLORS.intl : 'color:' + COLORS.domestic + ';border-color:' + COLORS.domestic);
+            let latencyColor = !latest ? COLORS.textNone
+                : !latest.ok           ? COLORS.danger
+                : latest.ms < LATENCY_WARN ? COLORS.success : COLORS.warning;
             let latencyText  = !latest ? '--' : !latest.ok ? 'timeout' : latest.ms + 'ms';
 
             return E('div', {
@@ -290,7 +328,7 @@ return view.extend({
 
         async function probeSite(site) {
             let ctrl  = new AbortController();
-            let timer = setTimeout(() => ctrl.abort(), 5000);
+            let timer = setTimeout(() => ctrl.abort(), PROBE_TIMEOUT);
             let t0    = performance.now();
             try {
                 await fetch(site.url, { mode: 'no-cors', cache: 'no-store', signal: ctrl.signal });
@@ -298,7 +336,7 @@ return view.extend({
                 return { ms: Math.round(performance.now() - t0), ok: true };
             } catch(e) {
                 clearTimeout(timer);
-                return { ms: 5000, ok: false };
+                return { ms: PROBE_TIMEOUT, ok: false };
             }
         }
 
@@ -310,7 +348,7 @@ return view.extend({
                 let site = PROBE_SITES[i];
                 if (!_probeHistory[site.id]) _probeHistory[site.id] = [];
                 _probeHistory[site.id].push(results[i]);
-                if (_probeHistory[site.id].length > 15) _probeHistory[site.id].shift();
+                if (_probeHistory[site.id].length > PROBE_HISTORY) _probeHistory[site.id].shift();
                 let old = $id('probe-card-' + site.id);
                 if (old) old.replaceWith(renderProbeCard(site));
             }
@@ -323,7 +361,7 @@ return view.extend({
         }
         /* 异步探测，完成后更新卡片 */
         setTimeout(function() { probeAll(); }, 100);
-        poll.add(function() { return probeAll().catch(function() {}); }, 30);
+        poll.add(function() { return probeAll().catch(function() {}); }, PROBE_INTERVAL);
 
         return node;
     },
